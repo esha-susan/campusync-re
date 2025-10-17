@@ -1,0 +1,143 @@
+.splash-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .splash-container::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: moveBackground 20s linear infinite;
+  }
+  
+  @keyframes moveBackground {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(50px, 50px);
+    }
+  }
+  
+  .splash-content {
+    text-align: center;
+    z-index: 1;
+    animation: fadeInUp 1s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .logo-animation {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .logo-circle {
+    width: 150px;
+    height: 150px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+  
+  .logo-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+  }
+  
+  .logo-hexagon {
+    fill: white;
+    stroke: rgba(255, 255, 255, 0.5);
+    stroke-width: 2;
+    animation: rotate 10s linear infinite;
+    transform-origin: center;
+  }
+  
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .logo-text {
+    font-size: 45px;
+    font-weight: bold;
+    fill: #667eea;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .splash-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .splash-subtitle {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+  
+  .splash-loader {
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  .loader-bar {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    animation: loading 2s ease-in-out infinite;
+  }
+  
+  @keyframes loading {
+    0% {
+      width: 0%;
+      margin-left: 0;
+    }
+    50% {
+      width: 100%;
+      margin-left: 0;
+    }
+    100% {
+      width: 0%;
+      margin-left: 100%;
+    }
+  }

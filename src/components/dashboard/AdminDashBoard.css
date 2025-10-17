@@ -1,0 +1,128 @@
+.approvals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .approval-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--light-bg);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    gap: 16px;
+  }
+  
+  .approval-item:hover {
+    background: var(--border-color);
+  }
+  
+  .approval-info {
+    flex: 1;
+  }
+  
+  .activity-name {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin: 6px 0;
+    font-weight: 500;
+  }
+  
+  .approval-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  
+  .points-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .date-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
+  .approval-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .btn-success {
+    background: var(--success-color);
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background: #059669;
+  }
+  
+  .users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--light-bg);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .user-item:hover {
+    background: var(--border-color);
+    transform: translateX(4px);
+  }
+  
+  .user-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  
+  .user-info {
+    flex: 1;
+  }
+  
+  .user-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  
+  .user-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .user-role {
+    text-transform: capitalize;
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  .joined-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
