@@ -1,0 +1,331 @@
+.calendar-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  
+  .calendar-card {
+    background: white;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .nav-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--light-bg);
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: var(--border-color);
+    transform: scale(1.1);
+  }
+  
+  .month-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .calendar-header-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .day-name {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 8px;
+  }
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  
+  .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: var(--light-bg);
+  }
+  
+  .calendar-day:hover {
+    background: var(--border-color);
+    transform: scale(1.05);
+  }
+  
+  .calendar-day.empty {
+    background: transparent;
+    cursor: default;
+  }
+  
+  .calendar-day.today {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .calendar-day.selected {
+    background: #eff6ff;
+    border: 2px solid var(--primary-color);
+  }
+  
+  .calendar-day.has-events .day-number {
+    font-weight: 700;
+  }
+  
+  .day-number {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  
+  .calendar-day.today .day-number {
+    color: white;
+  }
+  
+  .event-indicators {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+  }
+  
+  .event-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  
+  .event-dot.fest {
+    background: #ec4899;
+  }
+  
+  .event-dot.deadline {
+    background: #ef4444;
+  }
+  
+  .event-dot.workshop {
+    background: #3b82f6;
+  }
+  
+  .event-dot.academic {
+    background: #10b981;
+  }
+  
+  .event-dot.sports {
+    background: #f59e0b;
+  }
+  
+  .event-dot.cultural {
+    background: #8b5cf6;
+  }
+  
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 2px solid var(--border-color);
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  
+  .events-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  
+  .sidebar-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+  }
+  
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .event-card {
+    padding: 16px;
+    background: var(--light-bg);
+    border-radius: 10px;
+    border-left: 4px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+  
+  .event-card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .event-card.priority-high {
+    border-left-color: #ef4444;
+  }
+  
+  .event-card.priority-medium {
+    border-left-color: #f59e0b;
+  }
+  
+  .event-card.priority-low {
+    border-left-color: #10b981;
+  }
+  
+  .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .event-type-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .event-type-badge.fest {
+    background: #fce7f3;
+    color: #9f1239;
+  }
+  
+  .event-type-badge.deadline {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .event-type-badge.workshop {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .event-type-badge.academic {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .event-type-badge.sports {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .event-type-badge.cultural {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+  
+  .priority-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .priority-badge.high {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .priority-badge.medium {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .priority-badge.low {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .event-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  
+  .event-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  
+  .event-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .event-meta .meta-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
+  .register-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 968px) {
+    .calendar-container {
+      grid-template-columns: 1fr;
+    }
+  
+    .calendar-grid {
+      gap: 4px;
+    }
+  
+    .day-number {
+      font-size: 14px;
+    }
+  }
