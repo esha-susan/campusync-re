@@ -119,7 +119,7 @@ const AdminDashboard = ({ userRole, onLogout }) => {
               <Link to="/admin/users/create" className="action-card">
                 <span className="action-icon">➕</span><span className="action-label">Add User</span>
               </Link>
-              <Link to="/admin/calendar" className="action-card">
+              <Link to="/calendar/schedule" className="action-card">
                 <span className="action-icon">📅</span><span className="action-label">Create Event</span>
               </Link>
               <Link to="/admin/queries" className="action-card">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './CreateEvent.css';
-import { createEvent } from '../../services/eventService';
+import { createEvent } from '../services/eventService';
 
 // --- 1. THE COMPONENT NOW ACCEPTS A PROP: onEventCreated ---
 const CreateEvent = ({ onEventCreated }) => {

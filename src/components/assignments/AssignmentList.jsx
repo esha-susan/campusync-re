@@ -1,38 +1,95 @@
-import React, { useState } from 'react';
+// 1. IMPORT useEffect and getAssignments SERVICE
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getAssignments } from '../../services/assignmentService'; 
+
 import Navbar from '../common/Navbar';
-import Sidebar from '../common/SideBar'; // <-- 1. IMPORT YOUR REAL SIDEBAR
-// import Footer from '../common/Footer';
+import Sidebar from '../common/SideBar'; 
 import './AssignmentList.css'; 
 
 const AssignmentList = ({ userRole, onLogout, initialFilter = 'all' }) => {
   const [filter, setFilter] = useState(initialFilter);
-  const [assignments] = useState([
-    { id: 1, title: 'ER Diagram Design', subject: 'Database Systems', description: 'Design an ER diagram for a library management system.', dueDate: '2025-10-05', status: 'pending', points: 20 },
-    { id: 2, title: 'Process Scheduling Algorithm', subject: 'Operating Systems', description: 'Implement and compare different CPU scheduling algorithms.', dueDate: '2025-10-08', status: 'submitted', points: 25 },
-    { id: 3, title: 'TCP/IP Protocol Analysis', subject: 'Computer Networks', description: 'Analyze TCP/IP packet structure and flow control mechanisms.', dueDate: '2025-10-12', status: 'graded', grade: 'A', points: 20 },
-    { id: 4, title: 'Binary Search Tree Implementation', subject: 'Data Structures', description: 'Implement BST with insertion, deletion, and traversal operations.', dueDate: '2025-10-15', status: 'pending', points: 30 }
-  ]);
+
+  // 2. SET UP STATE FOR DYNAMIC DATA, LOADING, AND ERRORS
+  // The assignments state will now start empty and be filled by our service.
+  const [assignments, setAssignments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 3. FETCH DATA WHEN THE COMPONENT MOUNTS
+  // useEffect runs after the component renders. We use it to fetch data.
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        // We call the getAssignments function from our service file.
+        // It will return the array from the service (including any new assignments).
+        const data = await getAssignments(userRole);
+        setAssignments(data);
+      } catch (err) {
+        setError('Failed to load assignments. Please try again later.');
+        console.error(err);
+      } finally {
+        // This runs whether the fetch succeeded or failed.
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, [userRole]); // The dependency array makes this run only once when the component mounts.
+
   const filteredAssignments = assignments.filter(a => filter === 'all' || a.status === filter);
   
-  return (
-    <div className="layout-wrapper">
-      
-      {/* --- 2. USE THE IMPORTED SIDEBAR COMPONENT --- */}
-      <Sidebar userRole={userRole} />
-      
-      {/* --- MAIN CONTENT AREA --- */}
-      <div className="main-content-wrapper">
-        <div className="navbar-container">
-        <Navbar userName="John Doe" userRole="Student" /> 
-          {/* You will replace this with your <Navbar /> component later */}
-          <div className="navbar-placeholder">
-            <input type="text" placeholder="Search..." />
-            <div className="user-profile">
-              <span>J</span>
-              <div>John Doe</div>
+  // Helper function to render the main content
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="loading-indicator">Loading assignments...</div>;
+    }
+
+    if (error) {
+      return <div className="error-message">{error}</div>;
+    }
+
+    if (filteredAssignments.length === 0) {
+      return <div className="no-assignments">No assignments found for this category.</div>
+    }
+
+    return (
+      <div className="assignments-grid">
+        {filteredAssignments.map(assignment => (
+          <div key={assignment.id} className="assignment-card">
+            {/* Your assignment card JSX remains the same */}
+            <div className="assignment-card-header">
+              <span className="subject-tag">{assignment.subject || 'General'}</span>
+              <span className={`status-badge status-${assignment.status || (assignment.submitted ? 'submitted' : 'pending')}`}>
+                {assignment.status === 'graded' ? `Grade: ${assignment.grade}` : (assignment.status || (assignment.submitted ? 'submitted' : 'pending'))}
+              </span>
+            </div>
+            <div className="assignment-card-body">
+              <h3 className="assignment-card-title">{assignment.title}</h3>
+              <p className="assignment-card-description">{assignment.description}</p>
+            </div>
+            <div className="assignment-card-meta">
+              <div className="meta-item"><span>📅</span> Due: {assignment.dueDate}</div>
+              <div className="meta-item"><span>⭐</span> {assignment.points || 20} points</div>
+            </div>
+            <div className="assignment-card-actions">
+              {assignment.status === 'pending' && <Link to={`/student/assignments/submit/${assignment.id}`} className="btn btn-primary btn-block">Submit Assignment</Link>}
+              {assignment.status === 'submitted' && <button className="btn btn-secondary btn-block" disabled>Submitted - Awaiting Grading</button>}
+              {assignment.status === 'graded' && <Link to={`/student/assignments/${assignment.id}`} className="btn btn-success btn-block">View Feedback</Link>}
             </div>
           </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="layout-wrapper">
+      <Sidebar userRole={userRole} />
+      
+      <div className="main-content-wrapper">
+        <div className="navbar-container">
+          <Navbar userName="John Doe" userRole="Student" /> 
         </div>
         
         <main className="page-content">
@@ -48,31 +105,8 @@ const AssignmentList = ({ userRole, onLogout, initialFilter = 'all' }) => {
             <button className={`filter-tab ${filter === 'graded' ? 'active' : ''}`} onClick={() => setFilter('graded')}>Graded</button>
           </div>
 
-          <div className="assignments-grid">
-            {filteredAssignments.map(assignment => (
-              <div key={assignment.id} className="assignment-card">
-                <div className="assignment-card-header">
-                  <span className="subject-tag">{assignment.subject}</span>
-                  <span className={`status-badge status-${assignment.status}`}>
-                    {assignment.status === 'graded' ? `Grade: ${assignment.grade}` : assignment.status}
-                  </span>
-                </div>
-                <div className="assignment-card-body">
-                  <h3 className="assignment-card-title">{assignment.title}</h3>
-                  <p className="assignment-card-description">{assignment.description}</p>
-                </div>
-                <div className="assignment-card-meta">
-                  <div className="meta-item"><span>📅</span> Due: {assignment.dueDate}</div>
-                  <div className="meta-item"><span>⭐</span> {assignment.points} points</div>
-                </div>
-                <div className="assignment-card-actions">
-                  {assignment.status === 'pending' && <Link to={`/student/assignments/submit/${assignment.id}`} className="btn btn-primary btn-block">Submit Assignment</Link>}
-                  {assignment.status === 'submitted' && <button className="btn btn-secondary btn-block" disabled>Submitted - Awaiting Grading</button>}
-                  {assignment.status === 'graded' && <Link to={`/student/assignments/${assignment.id}`} className="btn btn-success btn-block">View Feedback</Link>}
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* 4. RENDER THE DYNAMIC CONTENT */}
+          {renderContent()}
         </main>
       </div>
     </div>

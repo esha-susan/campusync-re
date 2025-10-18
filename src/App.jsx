@@ -22,10 +22,15 @@ import ActivityHub from './components/activities/ActivityHub';
 import ActivityPoints from './components/activities/ActivityPoints';
 import SubmitCertificate from './components/activities/SubmitCertificate';
 
+// --- IMPORTS FOR NEWLY ADDED PAGES ---
+import CreateAssignmentPage from './components/faculty/CreateAssignmentPage';
+import AdminSettingsPage from './components/admin/AdminSettingsPage';
+import CreateEventPage from './events/CreateEventPage'; // Correct path
+
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [userRole, setUserRole] = useState('student'); // Change this to 'admin' or 'student' to test
+  const [userRole, setUserRole] = useState('admin');
   const [currentUser, setCurrentUser] = useState(null);
 
   const navigate = useNavigate();
@@ -62,36 +67,62 @@ function App() {
     <>
       {showSplash ? <LogoSplash /> : (
         <Routes>
-          {isAuthenticated && currentUser ? ( // Wait for currentUser to be loaded
+          {isAuthenticated && currentUser ? (
             <>
+              {/* --- PROFILE ROUTE --- */}
+              <Route
+                path="/profile"
+                element={<ProfilePage user={currentUser} onLogout={handleLogout} />}
+              />
+
+              {/* --- SHARED & STUDENT ROUTES --- */}
               <Route path="/landing" element={<LandingPage onLogout={handleLogout} />} />
-              <Route path="/profile" element={<ProfilePage user={currentUser} onLogout={handleLogout} />} />
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/dashboard" element={<DashboardRouter role={userRole} onLogout={handleLogout} />} />
               <Route path="/student/dashboard" element={<DashboardRouter role={userRole} onLogout={handleLogout} />} />
-              
-              {/* THIS ROUTE NOW PASSES THE ENTIRE 'user' OBJECT */}
-              <Route 
-                path="/calendar" 
-                element={<SmartCalendar user={currentUser} onLogout={handleLogout} />} 
-              />
-              
+              <Route path="/calendar" element={<SmartCalendar user={currentUser} onLogout={handleLogout} />} />
               <Route path="/submit-query" element={<QueryForm onLogout={handleLogout} />} />
               <Route path="/student/assignments" element={<AssignmentList userRole="student" onLogout={handleLogout} />} />
               <Route path="/student/assignments/submit/:id" element={<AssignmentSubmit onLogout={handleLogout} />} />
+              
+              {/* --- ACTIVITY ROUTES --- */}
               <Route path="/activities-hub" element={userRole === 'student' ? <ActivityHub /> : <Navigate to="/dashboard" />} />
               <Route path="/student/activities" element={userRole === 'student' ? <ActivityPoints onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
               <Route path="/activities" element={userRole === 'student' ? <ActivityPoints onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
               <Route path="/student/activities/submit" element={userRole === 'student' ? <SubmitCertificate onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
+              
+              {/* --- FACULTY & ADMIN ROUTES --- */}
               <Route path="/faculty/assignments" element={userRole === 'faculty' ? <AssignmentList userRole="faculty" /> : <Navigate to="/dashboard" />} />
+              <Route 
+                path="/faculty/assignments/create" 
+                element={userRole === 'faculty' ? <CreateAssignmentPage onLogout={handleLogout} /> : <Navigate to="/dashboard" />} 
+              />
               <Route path="/faculty/assignments/evaluate/:id" element={userRole === 'faculty' ? <AssignmentEvaluate /> : <Navigate to="/dashboard" />} />
               <Route path="/admin/queries" element={userRole === 'admin' ? <QueryListPage /> : <Navigate to="/dashboard" />} />
+              <Route 
+                path="/admin/settings" 
+                element={userRole === 'admin' ? <AdminSettingsPage /> : <Navigate to="/dashboard" />} 
+              />
+              
+              {/* --- Admin Route to Schedule an Event (CORRECTED) --- */}
+              <Route 
+                path="/calendar/schedule"
+                element={
+                  userRole === 'admin' 
+                    ? <CreateEventPage user={currentUser} onLogout={handleLogout} /> 
+                    : <Navigate to="/dashboard" />
+                }
+              />
+              
+              {/* Catch-all route for authenticated users */}
               <Route path="*" element={<Navigate to="/landing" />} />
             </>
           ) : (
             <>
+              {/* --- PUBLIC ROUTES --- */}
               <Route path="/login" element={<Login onLogin={handleLogin} />} />
               <Route path="/register" element={<Register />} />
+              {/* Catch-all for unauthenticated users */}
               <Route path="*" element={<Navigate to="/login" />} />
             </>
           )}

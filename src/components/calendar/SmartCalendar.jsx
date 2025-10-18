@@ -1,55 +1,71 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './SmartCalendar.css';
-import CreateEvent from '../events/CreateEvent';
-
-const initialEvents = [
-  { id: 'event-1', title: 'Tech Fest 2025', date: '2025-10-15', time: '10:00 AM', type: 'fest', priority: 'high', description: 'Annual technical festival' },
-  { id: 'event-2', title: 'Database Systems Assignment Due', date: '2025-10-05', time: '11:59 PM', type: 'deadline', priority: 'high', description: 'ER Diagram submission' },
-  { id: 'event-3', title: 'Workshop on AI/ML', date: '2025-10-10', time: '2:00 PM', type: 'workshop', priority: 'medium', description: 'Introduction to Machine Learning' },
-  { id: 'event-6', title: 'Cultural Night', date: '2025-10-25', time: '6:00 PM', type: 'cultural', priority: 'medium', description: 'Annual cultural program' }
-];
+import CreateEvent from '../../events/CreateEvent';
+import { getEvents } from '../../services/eventService'; // 1. IMPORT THE EVENT SERVICE
 
 const SmartCalendar = ({ user, onLogout }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [events, setEvents] = useState(initialEvents);
+  
+  // 2. INITIALIZE STATE FOR DYNAMIC DATA, LOADING, AND ERRORS
+  // The 'events' state now starts empty and will be filled by our service.
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [userNotes, setUserNotes] = useState([]);
   const [noteInput, setNoteInput] = useState('');
 
-  // Create a dynamic storage key based on the currently logged-in user's ID
   const notesStorageKey = `calendarUserNotes_${user.id}`;
 
-  // This effect now loads notes only for the current user
+  // 3. FETCH GLOBAL EVENTS FROM THE SERVICE WHEN THE COMPONENT LOADS
+  useEffect(() => {
+    const fetchGlobalEvents = async () => {
+      try {
+        setIsLoading(true);
+        const globalEvents = await getEvents(); // This gets the updated list from your service
+        setEvents(globalEvents);
+      } catch (err) {
+        setError('Failed to load campus events. Please try again later.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchGlobalEvents();
+  }, []); // The empty array [] ensures this runs only once when the component mounts
+
+  // This effect for loading/saving user's personal notes is already perfect. No changes needed.
   useEffect(() => {
     const savedNotes = localStorage.getItem(notesStorageKey);
     if (savedNotes) {
       setUserNotes(JSON.parse(savedNotes));
     }
-    // Important: Clear notes when user changes to prevent brief flash of old notes
     return () => setUserNotes([]); 
   }, [notesStorageKey]);
 
-  // This effect now saves notes only for the current user
   useEffect(() => {
     localStorage.setItem(notesStorageKey, JSON.stringify(userNotes));
   }, [userNotes, notesStorageKey]);
 
+  // This useMemo hook is also perfect. It will now combine the fetched global events with personal notes.
   const allCalendarItems = useMemo(() => {
     const formattedNotes = userNotes.map(note => ({ ...note, title: note.text, description: 'Personal Note' }));
     return [...events, ...formattedNotes];
   }, [events, userNotes]);
 
+  // This function is for the IN-PAGE form and is now correct.
   const handleAddNewEvent = (newEvent) => {
     setEvents(prevEvents => [...prevEvents, newEvent]);
     setIsFormVisible(false);
   };
 
+  // --- All of your other functions (getItemsForDate, handleAddNote, renderCalendar, etc.) are perfect. No changes are needed in them. ---
   const getItemsForDate = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return allCalendarItems.filter(item => item.date === dateStr);
   };
-
   const handleAddNote = (e) => {
     e.preventDefault();
     if (!noteInput.trim() || !selectedDate) return;
@@ -58,7 +74,6 @@ const SmartCalendar = ({ user, onLogout }) => {
     setUserNotes([...userNotes, newNote]);
     setNoteInput('');
   };
-
   const renderCalendar = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -83,11 +98,9 @@ const SmartCalendar = ({ user, onLogout }) => {
     }
     return (<><div className="calendar-header-days">{dayNames.map(name => (<div key={name} className="day-name">{name}</div>))}</div><div className="calendar-grid">{days}</div></>);
   };
-
   const changeMonth = (direction) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1));
   };
-
   const upcomingEvents = useMemo(() => {
     return allCalendarItems
       .filter(item => {
@@ -98,11 +111,21 @@ const SmartCalendar = ({ user, onLogout }) => {
       })
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [allCalendarItems]);
-
   const selectedDayItems = selectedDate ? getItemsForDate(selectedDate) : [];
+
+  // 4. ADD A CHECK FOR THE LOADING STATE
+  if (isLoading) {
+    return <div>Loading Calendar...</div>; // Or a more sophisticated loading spinner
+  }
+
+  // 5. ADD A CHECK FOR AN ERROR STATE
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
     <div className="dashboard-layout">
+      {/* ... The rest of your JSX structure is great. No changes needed below ... */}
       <div className="dashboard-container">
         <main className="dashboard-main">
           <div className="dashboard-content">

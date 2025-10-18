@@ -1,0 +1,145 @@
+.settings-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #ecf0f1;
+    padding-bottom: 1.5rem;
+  }
+  
+  .settings-section {
+    background-color: #ffffff;
+    border: 1px solid #ecf0f1;
+    border-radius: 8px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .settings-section h2 {
+    font-size: 1.4rem;
+    color: #34495e;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .settings-item label {
+    font-weight: 500;
+    color: #2c3e50;
+  }
+  
+  .settings-item input[type="text"] {
+    padding: 0.75rem;
+    border: 1px solid #bdc3c7;
+    border-radius: 5px;
+    width: 50%;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+  
+  .settings-item input[type="text"]:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  
+  .setting-description {
+      font-size: 0.9rem;
+      color: #95a5a6;
+      margin-top: 0.5rem;
+      padding-left: 3.5rem; /* Aligns with the toggle text */
+  }
+  
+  /* --- Toggle Switch Styles --- */
+  .toggle-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+  }
+  .toggle-switch .toggle-label {
+      font-weight: 500;
+      color: #2c3e50;
+  }
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 26px;
+    width: 50px;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: 0.4s;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+  }
+  input:checked + .slider {
+    background-color: #2ecc71;
+  }
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  /* --- End Toggle Styles --- */
+  
+  
+  .settings-actions {
+    margin-top: 2rem;
+    text-align: right;
+  }
+  .settings-actions button {
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .settings-actions button:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  .settings-actions button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  .success-message {
+    color: #2ecc71;
+    margin-bottom: 1rem;
+    text-align: right;
+  }
