@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../common/Navbar';
-import Sidebar from '../common/Sidebar';
+import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
-import './FacultyDashboard.css';
+import './FacultyDashBoard.css';
 
 const FacultyDashboard = ({ onLogout }) => {
   const [pendingAssignments] = useState([

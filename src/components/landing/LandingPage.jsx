@@ -2,9 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
-const LandingPage = () => {
+const LandingPage = ({ onLogout }) => {
   const [scrolled, setScrolled] = useState(false);
 
+  // This useEffect handles the scroll-in animations
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 }); // Trigger when 10% of the element is visible
+
+    const targets = document.querySelectorAll('.animate-on-scroll');
+    targets.forEach(target => observer.observe(target));
+
+    // Cleanup observer on component unmount
+    return () => targets.forEach(target => observer.unobserve(target));
+  }, []);
+  
+  // This useEffect handles the scrolled navbar style
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -12,39 +30,6 @@ const LandingPage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const features = [
-    {
-      icon: '📚',
-      title: 'Assignment Management',
-      description: 'Submit, track, and evaluate assignments seamlessly with automated notifications and feedback.'
-    },
-    {
-      icon: '📅',
-      title: 'Smart Calendar',
-      description: 'Never miss an event with priority-based notifications and integrated deadline tracking.'
-    },
-    {
-      icon: '🏆',
-      title: 'Activity Points',
-      description: 'Track and manage co-curricular activities with KTU point system integration.'
-    },
-    {
-      icon: '💬',
-      title: 'Communication Hub',
-      description: 'Direct query submission to faculty and admins with real-time tracking and responses.'
-    },
-    {
-      icon: '👥',
-      title: 'Multi-Role Access',
-      description: 'Customized dashboards for students, faculty, and administrators.'
-    },
-    {
-      icon: '🔒',
-      title: 'Secure Platform',
-      description: 'Role-based authentication ensuring data privacy and security.'
-    }
-  ];
 
   return (
     <div className="landing-page">
@@ -55,9 +40,9 @@ const LandingPage = () => {
             <span className="logo-name">Campusync</span>
           </div>
           <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-            <Link to="/login" className="btn btn-primary">Login</Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/profile">Profile</Link>
+            <button onClick={onLogout} className="btn btn-primary">Logout</button>
           </div>
         </div>
       </nav>
@@ -69,42 +54,49 @@ const LandingPage = () => {
               Welcome to <span className="gradient-text">Campusync</span>
             </h1>
             <p className="hero-subtitle">
-              Your all-in-one academic management platform for seamless collaboration between students, faculty, and administration.
+              Your academic life, organized and connected. Get started by exploring the features.
             </p>
             <div className="hero-buttons">
-              <Link to="/register" className="btn btn-primary btn-large">Get Started</Link>
-              <Link to="/login" className="btn btn-outline btn-large">Sign In</Link>
-            </div>
-          </div>
-          <div className="hero-image">
-            <div className="floating-card card-1">
-              <div className="card-icon">📚</div>
-              <div className="card-text">Assignments</div>
-            </div>
-            <div className="floating-card card-2">
-              <div className="card-icon">📅</div>
-              <div className="card-text">Events</div>
-            </div>
-            <div className="floating-card card-3">
-              <div className="card-icon">🏆</div>
-              <div className="card-text">Activities</div>
+              <Link to="/features" className="btn btn-primary btn-large">Explore Features</Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="features" className="features-section">
+      <section className="pillars-section">
         <div className="section-container">
-          <h2 className="section-title">Powerful Features</h2>
-          <p className="section-subtitle">Everything you need for efficient academic management</p>
-          <div className="features-grid">
-            {features.map((feature, index) => (
-              <div key={index} className="feature-card">
-                <div className="feature-icon">{feature.icon}</div>
-                <h3 className="feature-title">{feature.title}</h3>
-                <p className="feature-description">{feature.description}</p>
+          <h2 className="section-title animate-on-scroll">A Centralized Hub for Your College Life</h2>
+          <div className="pillars-grid">
+            <div className="pillar-card animate-on-scroll">
+              <div className="pillar-icon">
+                {/* SVG Icon for Academics */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
               </div>
-            ))}
+              <h3 className="pillar-title">Streamlined Academics</h3>
+              <p className="pillar-description">
+                Effortlessly manage assignments, track deadlines, and monitor your academic progress from a single, unified dashboard.
+              </p>
+            </div>
+            <div className="pillar-card animate-on-scroll">
+              <div className="pillar-icon">
+                {/* SVG Icon for Communication */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
+              </div>
+              <h3 className="pillar-title">Seamless Communication</h3>
+              <p className="pillar-description">
+                Connect directly with faculty and administration. Submit queries and receive timely responses without the clutter of emails.
+              </p>
+            </div>
+            <div className="pillar-card animate-on-scroll">
+              <div className="pillar-icon">
+                 {/* SVG Icon for Development/Growth */}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-2.25M21 18l-3.75-2.25m0 0l-3.75 2.25M15 12l5.25-3M15 12v6" /></svg>
+              </div>
+              <h3 className="pillar-title">Holistic Development</h3>
+              <p className="pillar-description">
+                Keep track of co-curricular activities and manage your KTU activity points to ensure well-rounded growth.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -112,29 +104,23 @@ const LandingPage = () => {
       <section id="about" className="about-section">
         <div className="section-container">
           <div className="about-content">
-            <div className="about-text">
-              <h2 className="section-title">About Campusync</h2>
+            <div className="about-text animate-on-scroll">
+              <h2 className="section-title" style={{textAlign: 'left'}}>About Campusync</h2>
               <p className="about-description">
                 Campusync is a centralized student portal developed by students of Govt Model Engineering College 
-                to streamline academic activities and communication. Our platform integrates essential features 
-                for user management, assignment tracking, event scheduling, and query handling into a single, 
-                secure system.
-              </p>
-              <p className="about-description">
-                With role-based access and personalized dashboards, Campusync ensures that students, faculty, 
-                and administrators can efficiently manage their academic responsibilities.
+                to streamline academic activities and communication.
               </p>
               <div className="about-team">
                 <h3>Developed By</h3>
                 <div className="team-members">
-                  <span className="team-member">Drishya Ajith</span>
-                  <span className="team-member">Dyuthi Hareesh</span>
-                  <span className="team-member">Esha Susan Shaji</span>
-                  <span className="team-member">Iba Raphy</span>
+                  <span>Drishya Ajith</span>
+                  <span>Dyuthi Hareesh</span>
+                  <span>Esha Susan Shaji</span>
+                  <span>Iba Raphy</span>
                 </div>
               </div>
             </div>
-            <div className="about-stats">
+            <div className="about-stats animate-on-scroll">
               <div className="stat-card">
                 <div className="stat-number">3</div>
                 <div className="stat-label">User Roles</div>
@@ -151,7 +137,7 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
-
+      
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-logo">
