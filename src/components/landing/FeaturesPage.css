@@ -1,6 +1,8 @@
+/* --- FEATURES PAGE STYLES - VIBRANT & BRANDED --- */
+
 .features-page-container {
     min-height: 100vh;
-    background-color: #f7fafc;
+    background-color: #f8f9fa;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,22 +15,26 @@
     text-align: center;
 }
 
+/* --- 1. GRADIENT TEXT FOR THE MAIN TITLE --- */
 .features-page-title {
     font-size: 48px;
     font-weight: 800;
-    color: #1a202c;
     margin-bottom: 16px;
+    /* The gradient effect */
+    background: linear-gradient(135deg, var(--primary-color, #667eea), var(--primary-color-dark, #764ba2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .features-page-subtitle {
     font-size: 18px;
-    color: #4a5568;
+    color: var(--text-secondary, #4a5568);
     margin-bottom: 60px;
 }
 
 .actions-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two cards per row */
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
     text-align: left;
 }
@@ -38,66 +44,90 @@
     border-radius: 16px;
     padding: 30px;
     text-decoration: none;
-    color: #1a202c;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #e2e8f0;
+    color: var(--text-primary, #1a202c);
+    border: 1px solid var(--border-color, #e2e8f0);
     transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    /* Remove default flex alignment to use the content div */
 }
 
 .action-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border-color: #667eea;
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
 }
 
+/* --- 2. NEW STYLES FOR ICONS --- */
 .action-icon {
-    font-size: 36px;
-    margin-bottom: 16px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 28px;
+    margin-bottom: 20px;
+    /* Subtle, on-brand background and color */
+    background-color: rgba(102, 126, 234, 0.1);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+/* The content inside the card, now with flex for alignment */
+.action-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allows content to push arrow down */
 }
 
 .action-title {
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 8px;
+    color: var(--text-primary, #1a202c);
+    transition: color 0.3s ease;
 }
 
 .action-description {
     font-size: 15px;
-    color: #4a5568;
+    color: var(--text-secondary, #4a5568);
     line-height: 1.6;
+    flex-grow: 1; /* Pushes arrow to the bottom */
 }
 
 .action-arrow {
     font-size: 28px;
     font-weight: bold;
-    color: #cbd5e0;
+    color: var(--border-color, #e2e8f0);
     transition: all 0.3s ease;
+    align-self: flex-end; /* Aligns arrow to the right */
+    margin-top: 24px;
+}
+
+/* --- 3. ENHANCED HOVER EFFECTS --- */
+.action-card:hover .action-icon {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.1) rotate(10deg);
+}
+
+.action-card:hover .action-title {
+    color: var(--primary-color);
 }
 
 .action-card:hover .action-arrow {
-    color: #667eea;
+    color: var(--primary-color);
     transform: translateX(5px);
 }
 
-.back-link-container {
-    margin-top: 60px;
-}
+/* Back Link styling */
+.back-link-container { margin-top: 60px; }
+.back-link { color: var(--primary-color); text-decoration: none; font-weight: 600; }
+.back-link:hover { color: var(--primary-color-dark); }
 
-.back-link {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.back-link:hover {
-    color: #764ba2;
-}
-
+/* Responsive adjustment */
 @media (max-width: 768px) {
     .actions-grid {
-        grid-template-columns: 1fr; /* Single column on smaller screens */
+        grid-template-columns: 1fr;
     }
 }

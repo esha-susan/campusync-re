@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../common/Navbar';
+import SideBar from '../common/SideBar'; // Corrected: Was 'SideBar'
 import './Dashboard.css'; 
-import './AdminDashBoard.css'; 
+import './AdminDashBoard.css'; // Corrected: Was 'AdminDashBoard.css'
 
-const AdminDashboard = ({ onLogout }) => {
+// 1. Component now correctly accepts 'userRole' and 'onLogout'
+const AdminDashboard = ({ userRole, onLogout }) => { 
   const [pendingApprovals] = useState([
     { id: 1, student: 'John Doe', activity: 'Hackathon Winner', points: 15, date: '2025-09-25' },
     { id: 2, student: 'Jane Smith', activity: 'Paper Presentation', points: 10, date: '2025-09-22' },
@@ -24,9 +27,14 @@ const AdminDashboard = ({ onLogout }) => {
   const handleReject = (id) => { alert(`Rejected activity #${id}`); };
 
   return (
-    <div className="dashboard-layout">
-      <main className="dashboard-main">
-        <div className="dashboard-content-wide">
+    // 2. Use the correct layout wrapper structure
+    <div className="layout-wrapper">
+      <SideBar userRole={userRole} />
+      <div className="main-content-wrapper">
+      
+        <Navbar userName="Admin User" userRole={userRole} onLogout={onLogout} />
+        
+        <main className="page-content">
           <div className="page-header">
             <div>
               <h1 className="page-title"><span className="gradient-text">Admin Dashboard</span></h1>
@@ -108,11 +116,22 @@ const AdminDashboard = ({ onLogout }) => {
           <div className="dashboard-card full-width-card">
             <h3 className="card-title">Quick Actions</h3>
             <div className="quick-actions">
-                {/* Your Quick Actions Links Go Here */}
+              <Link to="/admin/users/create" className="action-card">
+                <span className="action-icon">➕</span><span className="action-label">Add User</span>
+              </Link>
+              <Link to="/admin/calendar" className="action-card">
+                <span className="action-icon">📅</span><span className="action-label">Create Event</span>
+              </Link>
+              <Link to="/admin/queries" className="action-card">
+                <span className="action-icon">💬</span><span className="action-label">View Queries</span>
+              </Link>
+              <Link to="/admin/settings" className="action-card">
+                <span className="action-icon">⚙️</span><span className="action-label">System Settings</span>
+              </Link>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

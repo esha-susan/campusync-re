@@ -1,37 +1,49 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// import Navbar from '../common/Navbar';
-// import Sidebar from '../common/Sidebar';
-// import Footer from '../common/Footer';
 import './SmartCalendar.css';
+import CreateEvent from '../events/CreateEvent';
 
-const SmartCalendar = ({ userRole, onLogout }) => {
+const initialEvents = [
+  { id: 'event-1', title: 'Tech Fest 2025', date: '2025-10-15', time: '10:00 AM', type: 'fest', priority: 'high', description: 'Annual technical festival' },
+  { id: 'event-2', title: 'Database Systems Assignment Due', date: '2025-10-05', time: '11:59 PM', type: 'deadline', priority: 'high', description: 'ER Diagram submission' },
+  { id: 'event-3', title: 'Workshop on AI/ML', date: '2025-10-10', time: '2:00 PM', type: 'workshop', priority: 'medium', description: 'Introduction to Machine Learning' },
+  { id: 'event-6', title: 'Cultural Night', date: '2025-10-25', time: '6:00 PM', type: 'cultural', priority: 'medium', description: 'Annual cultural program' }
+];
+
+const SmartCalendar = ({ user, onLogout }) => {
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [events, setEvents] = useState(initialEvents);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null); 
+  const [selectedDate, setSelectedDate] = useState(null);
   const [userNotes, setUserNotes] = useState([]);
   const [noteInput, setNoteInput] = useState('');
 
-  const events = [
-    { id: 'event-1', title: 'Tech Fest 2025', date: '2025-10-15', time: '10:00 AM', type: 'fest', priority: 'high', description: 'Annual technical festival' },
-    { id: 'event-2', title: 'Database Systems Assignment Due', date: '2025-10-05', time: '11:59 PM', type: 'deadline', priority: 'high', description: 'ER Diagram submission' },
-    { id: 'event-3', title: 'Workshop on AI/ML', date: '2025-10-10', time: '2:00 PM', type: 'workshop', priority: 'medium', description: 'Introduction to Machine Learning' },
-    { id: 'event-6', title: 'Cultural Night', date: '2025-10-25', time: '6:00 PM', type: 'cultural', priority: 'medium', description: 'Annual cultural program' }
-  ];
+  // Create a dynamic storage key based on the currently logged-in user's ID
+  const notesStorageKey = `calendarUserNotes_${user.id}`;
 
+  // This effect now loads notes only for the current user
   useEffect(() => {
-    const savedNotes = localStorage.getItem('calendarUserNotes');
+    const savedNotes = localStorage.getItem(notesStorageKey);
     if (savedNotes) {
       setUserNotes(JSON.parse(savedNotes));
     }
-  }, []);
+    // Important: Clear notes when user changes to prevent brief flash of old notes
+    return () => setUserNotes([]); 
+  }, [notesStorageKey]);
 
+  // This effect now saves notes only for the current user
   useEffect(() => {
-    localStorage.setItem('calendarUserNotes', JSON.stringify(userNotes));
-  }, [userNotes]);
+    localStorage.setItem(notesStorageKey, JSON.stringify(userNotes));
+  }, [userNotes, notesStorageKey]);
 
   const allCalendarItems = useMemo(() => {
     const formattedNotes = userNotes.map(note => ({ ...note, title: note.text, description: 'Personal Note' }));
     return [...events, ...formattedNotes];
-  }, [userNotes]);
+  }, [events, userNotes]);
+
+  const handleAddNewEvent = (newEvent) => {
+    setEvents(prevEvents => [...prevEvents, newEvent]);
+    setIsFormVisible(false);
+  };
 
   const getItemsForDate = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -42,19 +54,11 @@ const SmartCalendar = ({ userRole, onLogout }) => {
     e.preventDefault();
     if (!noteInput.trim() || !selectedDate) return;
     const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-    const newNote = {
-      id: `note-${Date.now()}`,
-      date: dateStr,
-      text: noteInput,
-      type: 'note',
-      priority: 'medium',
-      title: noteInput,
-      description: 'Personal Note',
-    };
+    const newNote = { id: `note-${Date.now()}`, date: dateStr, text: noteInput, type: 'note', priority: 'medium', title: noteInput, description: 'Personal Note'};
     setUserNotes([...userNotes, newNote]);
     setNoteInput('');
   };
-  
+
   const renderCalendar = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -83,10 +87,15 @@ const SmartCalendar = ({ userRole, onLogout }) => {
   const changeMonth = (direction) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1));
   };
-  
+
   const upcomingEvents = useMemo(() => {
     return allCalendarItems
-      .filter(item => new Date(item.date) >= new Date())
+      .filter(item => {
+        const itemDate = new Date(item.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return itemDate >= today;
+      })
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [allCalendarItems]);
 
@@ -94,12 +103,9 @@ const SmartCalendar = ({ userRole, onLogout }) => {
 
   return (
     <div className="dashboard-layout">
-      {/* <Navbar ... /> */}
       <div className="dashboard-container">
-        {/* <Sidebar ... /> */}
         <main className="dashboard-main">
           <div className="dashboard-content">
-
             <div className="page-header">
               <div className="page-title-group">
                 <div className="page-title-icon">
@@ -112,12 +118,10 @@ const SmartCalendar = ({ userRole, onLogout }) => {
                   <p className="page-subtitle">View and manage events, deadlines, and activities</p>
                 </div>
               </div>
-              {userRole !== 'student' && (
-                <button className="btn btn-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  Create Event
+              
+              {user.role === 'admin' && (
+                <button onClick={() => setIsFormVisible(!isFormVisible)} className="btn btn-primary page-header-button">
+                  {isFormVisible ? 'Close Form' : 'Create Event'}
                 </button>
               )}
             </div>
@@ -145,7 +149,7 @@ const SmartCalendar = ({ userRole, onLogout }) => {
                       <h3 className="sidebar-title">
                         Details for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
                       </h3>
-                      <button className="clear-selection-btn" onClick={() => setSelectedDate(null)}>Show All</button>
+                      <button className="clear-selection-btn" onClick={() => setSelectedDate(null)}>Show All Upcoming</button>
                     </div>
                     <div className="events-list">
                       {selectedDayItems.length > 0 ? (
@@ -159,13 +163,15 @@ const SmartCalendar = ({ userRole, onLogout }) => {
                         <p className="no-events-text">No events or notes for this day.</p>
                       )}
                     </div>
-                    <div className="add-note-section">
-                      <h4 className="add-note-title">Add a Personal Note</h4>
-                      <form onSubmit={handleAddNote} className="add-note-form">
-                        <input type="text" className="note-input" placeholder="e.g., Study for OS exam" value={noteInput} onChange={(e) => setNoteInput(e.target.value)}/>
-                        <button type="submit" className="btn-small btn-primary">+ Add</button>
-                      </form>
-                    </div>
+                    {user.role === 'student' && (
+                      <div className="add-note-section">
+                        <h4 className="add-note-title">Add a Personal Note</h4>
+                        <form onSubmit={handleAddNote} className="add-note-form">
+                          <input type="text" className="note-input" placeholder="e.g., Study for OS exam" value={noteInput} onChange={(e) => setNoteInput(e.target.value)}/>
+                          <button type="submit" className="btn-small btn-primary">+ Add</button>
+                        </form>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -175,23 +181,28 @@ const SmartCalendar = ({ userRole, onLogout }) => {
                         upcomingEvents.map(event => (
                           <div key={event.id} className={`event-card priority-${event.priority}`}>
                             <h4 className="event-title">{event.title}</h4>
-                             <p className="event-description">{event.description}</p>
+                            <p className="event-description">{event.description}</p>
                             <div className="event-meta">
-                                <span className="meta-item">📅 {event.date}</span>
-                                {event.time && <span className="meta-item">🕐 {event.time}</span>}
+                              <span className="meta-item">📅 {event.date}</span>
+                              {event.time && <span className="meta-item">🕐 {event.time}</span>}
                             </div>
                           </div>
                         ))
                       ) : (
-                        <p className="no-events-text">No upcoming events or notes.</p>
+                        <p className="no-events-text">No upcoming events.</p>
                       )}
                     </div>
                   </>
                 )}
               </div>
             </div>
+            
+            {user.role === 'admin' && isFormVisible && (
+              <div className="event-creation-card">
+                <CreateEvent onEventCreated={handleAddNewEvent} />
+              </div>
+            )}
           </div>
-          {/* <Footer /> */}
         </main>
       </div>
     </div>

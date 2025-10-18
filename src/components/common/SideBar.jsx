@@ -1,33 +1,33 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import './SideBar.css';
+// --- 1. Use NavLink instead of Link and useLocation ---
+import { NavLink } from 'react-router-dom';
+import './SideBar.css'; // Your existing CSS file
 
 const Sidebar = ({ userRole }) => {
-  const location = useLocation();
-
+  // --- 2. Corrected paths to match your App.jsx router ---
   const studentMenuItems = [
-    { path: '/student/dashboard', icon: '🏠', label: 'Dashboard' },
+    { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/student/assignments', icon: '📚', label: 'Assignments' },
-    { path: '/student/calendar', icon: '📅', label: 'Calendar' },
-    { path: '/student/activities', icon: '🏆', label: 'Activities' },
-    { path: '/student/queries', icon: '💬', label: 'Queries' }
+    { path: '/calendar', icon: '📅', label: 'Calendar' },
+    { path: '/activities', icon: '🏆', label: 'Activities' },
+    { path: '/submit-query', icon: '💬', label: 'Queries' } // Correct path for submitting a query
   ];
 
   const facultyMenuItems = [
-    { path: '/faculty/dashboard', icon: '🏠', label: 'Dashboard' },
+    { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/faculty/assignments', icon: '📚', label: 'Assignments' },
-    { path: '/faculty/calendar', icon: '📅', label: 'Calendar' },
+    { path: '/calendar', icon: '📅', label: 'Calendar' },
     { path: '/faculty/queries', icon: '💬', label: 'Queries' },
-    { path: '/faculty/students', icon: '👥', label: 'Students' }
+    // { path: '/faculty/students', icon: '👥', label: 'Students' }
   ];
 
   const adminMenuItems = [
-    { path: '/admin/dashboard', icon: '🏠', label: 'Dashboard' },
+    { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/admin/users', icon: '👥', label: 'User Management' },
-    { path: '/admin/calendar', icon: '📅', label: 'Events' },
+    // { path: '/admin/calendar', icon: '📅', label: 'Events' },
     { path: '/admin/activities', icon: '🏆', label: 'Activity Approvals' },
     { path: '/admin/queries', icon: '💬', label: 'Queries' },
-    { path: '/admin/reports', icon: '📊', label: 'Reports' }
+    // { path: '/admin/reports', icon: '📊', label: 'Reports' }
   ];
 
   const getMenuItems = () => {
@@ -45,16 +45,21 @@ const Sidebar = ({ userRole }) => {
     <aside className="sidebar">
       <div className="sidebar-content">
         <nav className="sidebar-nav">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
-            >
-              <span className="sidebar-icon">{item.icon}</span>
-              <span className="sidebar-label">{item.label}</span>
-            </Link>
-          ))}
+          <ul> {/* Use <ul> for semantic list */}
+            {menuItems.map((item) => (
+              <li key={item.path}>
+                {/* --- 3. Use NavLink component --- */}
+                <NavLink
+                  to={item.path}
+                  // This function automatically adds the 'active' class
+                  className={({ isActive }) => isActive ? 'sidebar-item active' : 'sidebar-item'}
+                >
+                  <span className="sidebar-icon">{item.icon}</span>
+                  <span className="sidebar-label">{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
         </nav>
 
         <div className="sidebar-footer">

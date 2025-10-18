@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
-import Sidebar from '../common/Sidebar';
+import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './AssignmentEvaluate.css';
 

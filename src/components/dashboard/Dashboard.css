@@ -3,8 +3,8 @@
 /* 1. WIDER CONTENT AREA TO USE MORE SCREEN SPACE */
 .dashboard-content-wide {
     max-width: 1400px; /* Increased from the previous default */
-    margin: 0 auto;
-    padding: 40px;
+    margin: 0 ;
+    padding: 10px;
   }
   
   /* 2. NEW ATTRACTIVE PAGE HEADER STYLE */

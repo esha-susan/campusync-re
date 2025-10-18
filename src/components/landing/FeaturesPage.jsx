@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './FeaturesPage.css';
+import './FeaturesPage.css'; // This is your existing CSS file
 
 const FeaturesPage = () => {
   return (
@@ -12,7 +12,9 @@ const FeaturesPage = () => {
         </p>
         
         <div className="actions-grid">
-          <Link to="/assignments" className="action-card">
+          
+          {/* --- THIS IS THE MODIFIED LINK --- */}
+          <Link to="/student/assignments" className="action-card">
             <div className="action-card-content">
               <div className="action-icon">📚</div>
               <h3 className="action-title">Assignment Management</h3>
@@ -20,6 +22,9 @@ const FeaturesPage = () => {
             </div>
             <div className="action-arrow">→</div>
           </Link>
+          {/* --- END OF MODIFICATION --- */}
+
+          {/* Smart Calendar Link */}
           <Link to="/calendar" className="action-card">
             <div className="action-card-content">
               <div className="action-icon">📅</div>
@@ -29,7 +34,7 @@ const FeaturesPage = () => {
             <div className="action-arrow">→</div>
           </Link>
 
-          {/* --- THIS IS THE CORRECTED LINK --- */}
+          {/* Communication Hub Link */}
           <Link to="/submit-query" className="action-card">
             <div className="action-card-content">
               <div className="action-icon">💬</div>
@@ -38,9 +43,9 @@ const FeaturesPage = () => {
             </div>
             <div className="action-arrow">→</div>
           </Link>
-          {/* --- END OF CORRECTION --- */}
 
-           <Link to="/activities" className="action-card">
+          {/* Activity Points Link */}
+           <Link to="/activities-hub" className="action-card">
             <div className="action-card-content">
               <div className="action-icon">🏆</div>
               <h3 className="action-title">Activity Points</h3>

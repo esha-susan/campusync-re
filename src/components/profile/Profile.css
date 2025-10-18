@@ -1,0 +1,143 @@
+/* --- KEYFRAME ANIMATIONS for a 'fun' feel --- */
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* This is a general page container, assuming your main layout handles padding */
+  .profile-page-container {
+    padding: 2rem;
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  .profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    border: 1px solid #e9e9e9;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* --- INTERACTIVE: Make the card 'lift' on hover --- */
+  .profile-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+  
+  .profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 2rem;
+  }
+  
+  .profile-picture {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border: 5px solid transparent;
+    /* --- ANIMATED: Gradient border --- */
+    background: linear-gradient(to right, #8a48ac, #4d71d3) border-box;
+    box-shadow: 0 0 20px rgba(138, 72, 172, 0.3);
+    transition: transform 0.3s ease;
+  }
+  
+  /* --- INTERACTIVE: Picture grows on hover --- */
+  .profile-picture:hover {
+    transform: scale(1.08) rotate(3deg);
+  }
+  
+  .profile-name {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    /* --- FUN: Animated gradient text --- */
+    background: linear-gradient(45deg, #8a48ac, #4d71d3, #2c9a9d);
+    background-size: 200% 200%;
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    animation: gradient-animation 6s ease infinite;
+  }
+  
+  .profile-role {
+    font-size: 1rem;
+    color: #777;
+    background-color: #f3f4f6;
+    display: inline-block;
+    padding: 0.3rem 1rem;
+    border-radius: 16px;
+    margin-top: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .profile-details,
+  .admin-actions {
+    margin-top: 2rem;
+  }
+  
+  .details-title {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid;
+    border-image: linear-gradient(to right, #8a48ac, #4d71d3) 1;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+  }
+  
+  .profile-details ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .profile-details li {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    transition: background-color 0.3s ease, padding-left 0.3s ease;
+  }
+  
+  /* --- INTERACTIVE: List items highlight on hover --- */
+  .profile-details li:hover {
+    background-color: #fafafa;
+    padding-left: 1.5rem;
+    border-left: 3px solid #8a48ac;
+  }
+  
+  .profile-details li strong {
+    color: #333;
+  }
+  
+  .admin-actions .btn-secondary {
+    background: linear-gradient(to right, #6c757d, #343a40);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .admin-actions .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-// import Navbar from '../common/Navbar';
-// import Sidebar from '../common/Sidebar';
-// import Footer from '../common/Footer';
-import '../dashboard/Dashboard.css'; // Shared styles for the header
+ import Navbar from '../common/Navbar';
+ import Sidebar from '../common/SideBar';
+import Footer from '../common/Footer';
+
 import './AssignmentSubmit.css'; // Styles specific to this page
 
 const AssignmentSubmit = ({ onLogout }) => {

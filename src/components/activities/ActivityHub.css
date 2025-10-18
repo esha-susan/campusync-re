@@ -1,0 +1,39 @@
+.main-content-wrapper.full-width {
+    margin-left: 0; /* Use this if the page doesn't have a sidebar */
+  }
+  
+  .hub-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 24px;
+  }
+  
+  .hub-card {
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    background-color: white;
+    border-radius: 16px;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color, #e2e8f0);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .hub-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+  }
+  
+  .hub-icon { font-size: 48px; margin-bottom: 16px; }
+  .hub-title { font-size: 22px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .hub-description { font-size: 15px; color: var(--text-secondary); line-height: 1.6; flex-grow: 1; }
+  .hub-arrow { font-size: 28px; font-weight: bold; color: var(--border-color, #e2e8f0); transition: all 0.3s ease; align-self: flex-end; margin-top: 24px; }
+  .hub-card:hover .hub-arrow { color: var(--primary-color); transform: translateX(5px); }
+  
+  @media (max-width: 768px) {
+    .hub-grid { grid-template-columns: 1fr; }
+  }
