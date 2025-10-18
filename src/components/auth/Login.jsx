@@ -16,7 +16,9 @@ const Login = ({ onLogin }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    setError('');
+    if (error) {
+      setError('');
+    }
   };
 
   const handleSubmit = (e) => {
@@ -27,41 +29,17 @@ const Login = ({ onLogin }) => {
       return;
     }
 
-    // Simulate login - In real app, this would be an API call
+    console.log('Logging in with:', formData);
     onLogin(formData.role);
     navigate(`/${formData.role}/dashboard`);
   };
 
   return (
     <div className="login-container">
-      <div className="login-left">
-        <div className="login-branding">
-          <div className="brand-logo">
-            <div className="logo-icon-large">C</div>
-          </div>
-          <h1 className="brand-title">Campusync</h1>
-          <p className="brand-subtitle">Your Gateway to Academic Excellence</p>
-          <div className="brand-features">
-            <div className="brand-feature">
-              <span className="feature-icon">✓</span>
-              <span>Assignment Management</span>
-            </div>
-            <div className="brand-feature">
-              <span className="feature-icon">✓</span>
-              <span>Smart Calendar</span>
-            </div>
-            <div className="brand-feature">
-              <span className="feature-icon">✓</span>
-              <span>Activity Tracking</span>
-            </div>
-            <div className="brand-feature">
-              <span className="feature-icon">✓</span>
-              <span>Direct Communication</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Left Panel: Image */}
+      <div className="login-left"></div>
 
+      {/* Right Panel: Login Form */}
       <div className="login-right">
         <div className="login-form-container">
           <div className="form-header">
@@ -71,51 +49,49 @@ const Login = ({ onLogin }) => {
 
           {error && (
             <div className="error-message">
-              <span className="error-icon">⚠</span>
-              {error}
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
-              <label htmlFor="role" className="form-label">I am a</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="form-select"
-              >
-                <option value="student">Student</option>
-                <option value="faculty">Faculty</option>
-                <option value="admin">Administrator</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">Email Address</label>
+              <label htmlFor="email">Email Address</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-input"
-                placeholder="Enter your email"
+                placeholder="you@example.com"
+                autoComplete="email"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="password" className="form-label">Password</label>
+              <label htmlFor="password">Password</label>
               <input
                 type="password"
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="form-input"
                 placeholder="Enter your password"
+                autoComplete="current-password"
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="role">I am a...</label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+              >
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="admin">Administrator</option>
+              </select>
             </div>
 
             <div className="form-options">
@@ -126,17 +102,18 @@ const Login = ({ onLogin }) => {
               <a href="#" className="forgot-link">Forgot Password?</a>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block">
+            <button type="submit" className="btn-login">
               Sign In
             </button>
           </form>
 
           <div className="form-footer">
-            <p>Don't have an account? <Link to="/register" className="register-link">Register here</Link></p>
-          </div>
-
-          <div className="back-home">
-            <Link to="/" className="home-link">← Back to Home</Link>
+            <p>
+              Don't have an account? <Link to="/register" className="register-link">Register here</Link>
+            </p>
+            <p>
+              <Link to="/" className="home-link">← Back to Home</Link>
+            </p>
           </div>
         </div>
       </div>
