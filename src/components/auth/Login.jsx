@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../../../Supabaseclient'; // CORRECTED IMPORT PATH
 import './Login.css';
 
 const Login = ({ onLogin }) => {
@@ -7,9 +8,9 @@ const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'student'
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,25 +22,47 @@ const Login = ({ onLogin }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields');
+      setLoading(false);
       return;
     }
 
-    console.log('Logging in with:', formData);
-    onLogin(formData.role);
-    navigate(`/${formData.role}/dashboard`);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        const userRole = data.user.user_metadata.role;
+        if (!userRole) {
+            throw new Error("User role not found. Please contact support.");
+        }
+        
+        onLogin(userRole); // This still correctly sets the user's role in the app state
+        navigate('/landing'); // MODIFIED: This now redirects to the landing page
+      }
+
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        setLoading(false);
+    }
   };
 
   return (
     <div className="login-container">
-      {/* Left Panel: Image */}
       <div className="login-left"></div>
-
-      {/* Right Panel: Login Form */}
       <div className="login-right">
         <div className="login-form-container">
           <div className="form-header">
@@ -64,6 +87,7 @@ const Login = ({ onLogin }) => {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 autoComplete="email"
+                disabled={loading}
               />
             </div>
 
@@ -77,33 +101,20 @@ const Login = ({ onLogin }) => {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 autoComplete="current-password"
+                disabled={loading}
               />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">I am a...</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                <option value="student">Student</option>
-                <option value="faculty">Faculty</option>
-                <option value="admin">Administrator</option>
-              </select>
             </div>
 
             <div className="form-options">
               <label className="checkbox-label">
-                <input type="checkbox" />
+                <input type="checkbox" disabled={loading} />
                 <span>Remember me</span>
               </label>
               <a href="#" className="forgot-link">Forgot Password?</a>
             </div>
 
-            <button type="submit" className="btn-login">
-              Sign In
+            <button type="submit" className="btn-login" disabled={loading}>
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 

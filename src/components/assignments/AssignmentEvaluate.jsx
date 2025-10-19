@@ -1,81 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './AssignmentEvaluate.css';
+// MODIFIED: Make sure all required service functions are imported
+import { getAssignmentById, getSubmissionsForAssignment, saveEvaluation } from '../../services/assignmentService';
 
-const AssignmentEvaluate = ({ onLogout }) => {
+const AssignmentEvaluate = ({ currentUser, onLogout }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [evaluationData, setEvaluationData] = useState({
-    grade: '',
-    feedback: ''
-  });
+  const [evaluationData, setEvaluationData] = useState({ grade: '', feedback: '' });
+  
+  // States for real data
+  const [assignment, setAssignment] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const assignment = {
-    id: id,
-    title: 'ER Diagram Design',
-    subject: 'Database Systems',
-    totalPoints: 20
-  };
-
-  const submissions = [
-    { 
-      id: 1, 
-      student: 'John Doe', 
-      rollNumber: '21CS001',
-      submittedDate: '2025-10-03',
-      fileName: 'er_diagram_library.pdf',
-      status: 'pending'
-    },
-    { 
-      id: 2, 
-      student: 'Jane Smith', 
-      rollNumber: '21CS002',
-      submittedDate: '2025-10-04',
-      fileName: 'library_er_design.pdf',
-      status: 'graded',
-      grade: 'A',
-      feedback: 'Excellent work! Well structured ER diagram.'
-    },
-    { 
-      id: 3, 
-      student: 'Mike Johnson', 
-      rollNumber: '21CS003',
-      submittedDate: '2025-10-05',
-      fileName: 'er_diagram_final.pdf',
-      status: 'pending'
-    }
-  ];
+  // Fetch real data when the component loads
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const assignmentData = await getAssignmentById(id);
+        const submissionsData = await getSubmissionsForAssignment(id);
+        setAssignment(assignmentData);
+        setSubmissions(submissionsData);
+      } catch (err) {
+        setError('Failed to load data. Please try again.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [id]);
 
   const handleEvaluate = (submission) => {
     setSelectedSubmission(submission);
-    if (submission.status === 'graded') {
-      setEvaluationData({
-        grade: submission.grade,
-        feedback: submission.feedback
-      });
-    } else {
-      setEvaluationData({ grade: '', feedback: '' });
-    }
+    setEvaluationData({
+      grade: submission.grade || '',
+      feedback: submission.feedback || ''
+    });
   };
 
-  const handleSubmitEvaluation = (e) => {
+  const handleSubmitEvaluation = async (e) => {
     e.preventDefault();
-    if (!evaluationData.grade || !evaluationData.feedback) {
-      alert('Please provide both grade and feedback');
+    if (!evaluationData.grade) {
+      alert('Please provide a grade');
       return;
     }
-    alert('Evaluation saved successfully!');
-    setSelectedSubmission(null);
-    setEvaluationData({ grade: '', feedback: '' });
+    try {
+      const updatedSubmission = await saveEvaluation({
+        submissionId: selectedSubmission.id,
+        grade: evaluationData.grade,
+        feedback: evaluationData.feedback,
+      });
+      alert('Evaluation saved successfully!');
+      
+      // Refresh the local list with the new grade and feedback
+      const updatedSubmissions = submissions.map(sub => 
+        sub.id === selectedSubmission.id ? { ...sub, ...updatedSubmission } : sub
+      );
+      setSubmissions(updatedSubmissions);
+      setSelectedSubmission(null);
+    } catch (err) {
+      alert('Failed to save evaluation.');
+      console.error(err);
+    }
   };
+  
+  if (isLoading) return <div style={{ padding: '20px' }}>Loading...</div>;
+  if (error) return <div style={{ padding: '20px', color: 'red' }}>Error: {error}</div>;
 
+  // --- The only changes are below, to access the student object correctly ---
   return (
     <div className="dashboard-layout">
-      <Navbar userRole="faculty" userName="Dr. Sarah Wilson" onLogout={onLogout} />
+      <Navbar userRole="faculty" userName={currentUser?.user_metadata?.full_name || "Faculty"} onLogout={onLogout} />
       <div className="dashboard-container">
         <Sidebar userRole="faculty" />
         <main className="dashboard-main">
@@ -83,7 +85,7 @@ const AssignmentEvaluate = ({ onLogout }) => {
             <div className="page-header">
               <div>
                 <h1 className="page-title">Evaluate Submissions</h1>
-                <p className="page-subtitle">{assignment.subject} - {assignment.title}</p>
+                <p className="page-subtitle">{assignment?.subject} - {assignment?.title}</p>
               </div>
               <button onClick={() => navigate('/faculty/assignments')} className="btn btn-secondary">
                 ← Back to Assignments
@@ -101,17 +103,22 @@ const AssignmentEvaluate = ({ onLogout }) => {
                       onClick={() => handleEvaluate(submission)}
                     >
                       <div className="student-info">
-                        <div className="student-avatar">{submission.student.charAt(0)}</div>
+                        {/* ======================= FIX #1 ======================= */}
+                        {/* Access the first character of `full_name` */}
+                        <div className="student-avatar">{submission.student.full_name.charAt(0)}</div>
                         <div>
-                          <h4 className="student-name">{submission.student}</h4>
-                          <p className="student-roll">{submission.rollNumber}</p>
+                          {/* Access the `full_name` property */}
+                          <h4 className="student-name">{submission.student.full_name}</h4>
+                          {/* Access the `id_number` property */}
+                          <p className="student-roll">{submission.student.id_number}</p>
                         </div>
+                        {/* ====================================================== */}
                       </div>
                       <div className="submission-details">
-                        <p className="submission-date">📅 {submission.submittedDate}</p>
-                        <p className="submission-file">📄 {submission.fileName}</p>
-                        <span className={`status-badge status-${submission.status}`}>
-                          {submission.status === 'graded' ? `Grade: ${submission.grade}` : 'Pending'}
+                        <p className="submission-date">📅 {new Date(submission.submission_date).toLocaleDateString()}</p>
+                        <p className="submission-file">📄 {submission.file_url.split('/').pop()}</p>
+                        <span className={`status-badge status-${submission.grade ? 'graded' : 'pending'}`}>
+                          {submission.grade ? `Grade: ${submission.grade}` : 'Pending'}
                         </span>
                       </div>
                     </div>
@@ -123,19 +130,23 @@ const AssignmentEvaluate = ({ onLogout }) => {
                 {selectedSubmission ? (
                   <>
                     <div className="panel-header">
-                      <h3 className="panel-title">Evaluate: {selectedSubmission.student}</h3>
-                      <a href="#" className="download-link">📥 Download Submission</a>
+                      {/* ======================= FIX #2 ======================= */}
+                      {/* Access the `full_name` property here as well */}
+                      <h3 className="panel-title">Evaluate: {selectedSubmission.student.full_name}</h3>
+                      {/* ====================================================== */}
+                      <a href={selectedSubmission.file_url} target="_blank" rel="noopener noreferrer" className="download-link">📥 Download Submission</a>
                     </div>
 
                     <div className="submission-preview">
                       <div className="preview-placeholder">
                         <span className="preview-icon">📄</span>
-                        <p className="preview-text">{selectedSubmission.fileName}</p>
+                        <p className="preview-text">{selectedSubmission.file_url.split('/').pop()}</p>
                         <p className="preview-hint">Click download to view the full submission</p>
                       </div>
                     </div>
 
                     <form onSubmit={handleSubmitEvaluation} className="evaluation-form">
+                      {/* Your form JSX is already correct and needs no changes */}
                       <div className="form-group">
                         <label htmlFor="grade" className="form-label">Grade *</label>
                         <select
@@ -154,7 +165,6 @@ const AssignmentEvaluate = ({ onLogout }) => {
                           <option value="F">F (Fail)</option>
                         </select>
                       </div>
-
                       <div className="form-group">
                         <label htmlFor="feedback" className="form-label">Feedback *</label>
                         <textarea
@@ -166,7 +176,6 @@ const AssignmentEvaluate = ({ onLogout }) => {
                           rows="6"
                         ></textarea>
                       </div>
-
                       <div className="form-actions">
                         <button 
                           type="button" 

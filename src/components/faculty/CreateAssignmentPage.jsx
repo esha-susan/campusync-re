@@ -6,7 +6,8 @@ import Footer from '../common/Footer';
 import './CreateAssignmentPage.css';
 import { createAssignment } from '../../services/assignmentService';
 
-const CreateAssignmentPage = ({ onLogout }) => {
+// MODIFIED: Added currentUser prop to get the faculty's ID
+const CreateAssignmentPage = ({ currentUser, onLogout }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subject, setSubject] = useState('');
@@ -17,12 +18,8 @@ const CreateAssignmentPage = ({ onLogout }) => {
   const navigate = useNavigate();
 
   const subjects = [
-    'Database Systems',
-    'Operating Systems',
-    'Computer Networks',
-    'Web Development',
-    'Data Structures',
-    'Algorithms'
+    'Database Systems', 'Operating Systems', 'Computer Networks',
+    'Web Development', 'Data Structures', 'Algorithms'
   ];
 
   const handleSubmit = async (e) => {
@@ -36,16 +33,18 @@ const CreateAssignmentPage = ({ onLogout }) => {
       return;
     }
 
+    // MODIFIED: Prepare data for Supabase, including the faculty_id
     const assignmentData = { 
       title, 
       description, 
       subject,
-      dueDate, 
+      due_date: dueDate, // Match the database column name 'due_date'
       points: parseInt(points),
-      status: 'pending'
+      faculty_id: currentUser.id // Get the ID from the logged-in user object
     };
 
     try {
+      // MODIFIED: Calling the real service function
       await createAssignment(assignmentData);
       alert('Assignment created successfully!');
       navigate('/faculty/assignments');
@@ -56,12 +55,13 @@ const CreateAssignmentPage = ({ onLogout }) => {
       setIsLoading(false);
     }
   };
-
+  
+  // NO CHANGES TO THE JSX OR STYLING BELOW THIS LINE
   return (
     <div className="layout-wrapper">
       <Sidebar userRole="faculty" />
       <div className="main-content-wrapper">
-        <Navbar userName="Dr. Sarah Wilson" userRole="Faculty" onLogout={onLogout} />
+        <Navbar userName={currentUser?.full_name || 'Faculty'} userRole="Faculty" onLogout={onLogout} />
         <main className="page-content">
           <div className="page-header">
             <div>
@@ -69,91 +69,37 @@ const CreateAssignmentPage = ({ onLogout }) => {
               <p className="page-subtitle">Create a new assignment for your students</p>
             </div>
           </div>
-
           <div className="create-assignment-container">
             <form onSubmit={handleSubmit} className="assignment-form">
               {error && <div className="error-message">{error}</div>}
-
               <div className="form-group">
                 <label htmlFor="title">Assignment Title *</label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., ER Diagram Design"
-                  required
-                />
+                <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., ER Diagram Design" required />
               </div>
-
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="subject">Subject *</label>
-                  <select
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                  >
+                  <select id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} required>
                     <option value="">Select Subject</option>
-                    {subjects.map(subj => (
-                      <option key={subj} value={subj}>{subj}</option>
-                    ))}
+                    {subjects.map(subj => (<option key={subj} value={subj}>{subj}</option>))}
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="dueDate">Due Date *</label>
-                  <input
-                    type="date"
-                    id="dueDate"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    required
-                  />
+                  <input type="date" id="dueDate" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="points">Points *</label>
-                  <input
-                    type="number"
-                    id="points"
-                    value={points}
-                    onChange={(e) => setPoints(e.target.value)}
-                    placeholder="20"
-                    min="1"
-                    required
-                  />
+                  <input type="number" id="points" value={points} onChange={(e) => setPoints(e.target.value)} placeholder="20" min="1" required />
                 </div>
               </div>
-
               <div className="form-group">
                 <label htmlFor="description">Description *</label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Provide detailed instructions for the assignment"
-                  rows="8"
-                  required
-                ></textarea>
+                <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide detailed instructions for the assignment" rows="8" required></textarea>
               </div>
-
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary"
-                  onClick={() => navigate('/faculty/assignments')}
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating...' : 'Create Assignment'}
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => navigate('/faculty/assignments')}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Assignment'}</button>
               </div>
             </form>
           </div>

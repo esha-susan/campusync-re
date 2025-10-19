@@ -3,23 +3,34 @@ import { Link } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
-import './Dashboard.css'; // Import the unified CSS
+import './Dashboard.css';
 
-const FacultyDashboard = ({ onLogout }) => {
+// ========================== THIS IS THE ONLY CHANGE (PART 1) ==========================
+// The component now accepts the 'currentUser' object as a prop.
+const FacultyDashboard = ({ currentUser, onLogout }) => {
+// ====================================================================================
+
+  // All your mock data can stay the same for now. No changes needed here.
   const stats = [ { label: 'Pending Evaluations', value: '12', icon: '📝', color: '#3b82f6' }, { label: 'Total Students', value: '150', icon: '👥', color: '#10b981' }, { label: 'Pending Queries', value: '8', icon: '💬', color: '#f59e0b' }, { label: 'Upcoming Classes', value: '5', icon: '📚', color: '#ef4444' }];
   const pendingAssignments = [ { id: 1, title: 'ER Diagram Design', subject: 'Database Systems', submissions: 45, total: 50 }, { id: 2, title: 'Process Scheduling', subject: 'Operating Systems', submissions: 38, total: 50 }];
   const recentQueries = [ { id: 1, student: 'John Doe', subject: 'Database Systems', query: 'Clarification on normalization concepts', time: '2 hours ago', status: 'pending' }, { id: 2, student: 'Jane Smith', subject: 'Operating Systems', query: 'Doubt regarding deadlock prevention', time: '5 hours ago', status: 'answered' }];
   const quickActions = [ { to: '/faculty/assignments/create', label: 'Create Assignment', icon: '➕' }, { to: '/calendar', label: 'View Calendar', icon: '📅' }, { to: '/faculty/assignments', label: 'Manage Assignments', icon: '👥' }, { to: '/faculty/queries', label: 'View Queries', icon: '💬' }];
 
+  // No changes to your styling or layout. The JSX below is preserved.
   return (
     <div className="layout-wrapper">
       <Sidebar userRole="faculty" />
       <div className="main-content-wrapper">
-        <Navbar userName="Dr. Sarah Wilson" userRole="Faculty" onLogout={onLogout} />
+        {/* ======================= THIS IS THE ONLY CHANGE (PART 2) ======================= */}
+        {/* We use the 'currentUser' prop to display the real user's name. */}
+        <Navbar userName={currentUser?.user_metadata?.full_name || 'Faculty'} userRole="Faculty" onLogout={onLogout} />
+        {/* ================================================================================ */}
+        
         <main className="dashboard-main">
           <div className="dashboard-content">
             <div className="welcome-section">
-              <div><h1 className="dashboard-title">Welcome, Dr. Wilson! 👋</h1><p className="dashboard-subtitle">Here's an overview of your teaching activities.</p></div>
+              {/* You can also make the welcome message dynamic */}
+              <div><h1 className="dashboard-title">Welcome, {currentUser?.user_metadata?.full_name || 'Faculty'}! 👋</h1><p className="dashboard-subtitle">Here's an overview of your teaching activities.</p></div>
             </div>
             <div className="stats-grid">
               {stats.map((stat) => (
