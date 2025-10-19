@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
-const LandingPage = ({ onLogout }) => {
+// MODIFICATION 1: The component now accepts 'userRole' as a prop
+const LandingPage = ({ onLogout, userRole }) => {
   const [scrolled, setScrolled] = useState(false);
 
   // This useEffect handles the scroll-in animations
@@ -37,6 +38,9 @@ const LandingPage = ({ onLogout }) => {
     onLogout();
   };
 
+  // MODIFICATION 2: Determine the correct dashboard path based on the user's role
+  const dashboardPath = userRole ? `/${userRole}/dashboard` : '/dashboard';
+
   return (
     <div className="landing-page">
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
@@ -45,9 +49,9 @@ const LandingPage = ({ onLogout }) => {
             <span className="logo-icon">C</span>
             <span className="logo-name">Campusync</span>
           </div>
-          {/* FINAL MODIFICATION: All items are links with the same class name */}
           <div className="nav-links">
-            <Link to="/dashboard" className="nav-item">Dashboard</Link>
+            {/* MODIFICATION 3: The Dashboard Link now uses the dynamic 'dashboardPath' variable */}
+            <Link to={dashboardPath} className="nav-item">Dashboard</Link>
             <Link to="/profile" className="nav-item">Profile</Link>
             <a href="#" onClick={handleLogoutClick} className="nav-item">Logout</a>
           </div>

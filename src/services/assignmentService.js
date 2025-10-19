@@ -1,9 +1,7 @@
-import { supabase } from '../../Supabaseclient'; // Adjust path if this is incorrect
+import { supabase } from '../../Supabaseclient';
 
 /**
  * Creates a new assignment in the database.
- * @param {object} assignmentData - The assignment details from the form.
- * @returns {object} The newly created assignment data.
  */
 export const createAssignment = async (assignmentData) => {
   const { data, error } = await supabase
@@ -17,18 +15,41 @@ export const createAssignment = async (assignmentData) => {
 };
 
 /**
- * Fetches all assignments and includes a count of their submissions.
+ * Fetches ALL assignments and their stats. Used for the student view.
  */
-export const getAssignments = async () => {
-  const { data, error } = await supabase
-    .from('assignments')
-    .select(`*, submissions ( count )`);
+export const getAllAssignments = async () => {
+  const { data, error } = await supabase.rpc('get_assignment_stats');
 
-  if (error) throw error;
+  if (error) {
+    console.error("Error calling RPC get_assignment_stats:", error);
+    throw error;
+  }
   
   return data.map(a => ({
     ...a,
-    submissions: a.submissions[0]?.count || 0,
+    submissions: a.total_submissions || 0,
+    gradedCount: a.graded_submissions || 0,
+    totalStudents: 50, // This can be dynamic later
+  }));
+};
+
+/**
+ * Fetches only the assignments created by a specific faculty member.
+ */
+export const getAssignmentsForFaculty = async (facultyId) => {
+  const { data, error } = await supabase.rpc('get_assignments_for_faculty', {
+    p_faculty_id: facultyId
+  });
+
+  if (error) {
+    console.error("Error calling RPC get_assignments_for_faculty:", error);
+    throw error;
+  }
+  
+  return data.map(a => ({
+    ...a,
+    submissions: a.total_submissions || 0,
+    gradedCount: a.graded_submissions || 0,
     totalStudents: 50, // This can be dynamic later
   }));
 };
@@ -47,18 +68,18 @@ export const getAssignmentById = async (assignmentId) => {
 };
 
 /**
- * Checks if a specific student has a submission for a specific assignment.
+ * Checks a student's submission for an assignment and returns the grade if available.
  */
 export const getStudentSubmissionStatus = async (assignmentId, studentId) => {
-    const { data, error } = await supabase
-        .from('submissions')
-        .select('id')
-        .eq('assignment_id', assignmentId)
-        .eq('student_id', studentId)
-        .maybeSingle();
+  const { data, error } = await supabase
+      .from('submissions')
+      .select('id, grade')
+      .eq('assignment_id', assignmentId)
+      .eq('student_id', studentId)
+      .maybeSingle();
 
-    if (error) throw error;
-    return data;
+  if (error) throw error;
+  return data;
 };
 
 /**
@@ -78,7 +99,35 @@ export const getSubmissionsForAssignment = async (assignmentId) => {
     `)
     .eq('assignment_id', assignmentId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Critical error in getSubmissionsForAssignment:", error);
+    throw error;
+  }
+  return data;
+};
+
+/**
+ * Fetches the full details of a student's submission, including the grade,
+ * feedback, and the original assignment's title.
+ */
+export const getSubmissionDetails = async (assignmentId, studentId) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select(`
+      grade,
+      feedback,
+      file_url,
+      assignment:assignments ( title, subject )
+    `)
+    .eq('assignment_id', assignmentId)
+    .eq('student_id', studentId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching submission details:", error);
+    throw error;
+  }
+
   return data;
 };
 

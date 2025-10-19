@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '../Supabaseclient';
 
-// --- (Import ALL your pages and components here) ---
+// --- All your component imports are correct ---
 import LogoSplash from './components/landing/LogoSplash';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
@@ -17,18 +17,15 @@ import SmartCalendar from './components/calendar/SmartCalendar';
 import AssignmentList from './components/assignments/AssignmentList';
 import AssignmentSubmit from './components/assignments/AssignmentSubmit';
 import AssignmentEvaluate from './components/assignments/AssignmentEvaluate';
+import AssignmentFeedback from './components/assignments/AssignmentFeedback';
 import CreateAssignmentPage from './components/faculty/CreateAssignmentPage';
 import QueryListPage from './components/communication/QueryListPage';
 import QueryForm from './components/communication/QueryForm';
 import ActivityHub from './components/activities/ActivityHub';
-
-// ======================= IMPORTS FOR THE MISSING PAGES =======================
 import ActivityPoints from './components/activities/ActivityPoints';
 import SubmitCertificate from './components/activities/SubmitCertificate';
-// =============================================================================
 
 function App() {
-  // --- (All your existing state and useEffect hooks are correct and preserved) ---
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -36,29 +33,69 @@ function App() {
   const [loadingSession, setLoadingSession] = useState(true);
   const navigate = useNavigate();
 
+  // ========================== THIS IS THE DEFINITIVE FIX ==========================
+  // This useEffect logic is rewritten to be robust and prevent all race conditions.
   useEffect(() => {
-    const checkSession = async () => {
+    // This function handles the entire setup process in a linear, predictable way.
+    const setupSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+
+      if (session && session.user) {
+        // If a user session exists, we MUST fetch their role before proceeding.
+        const user = session.user;
+        
+        const { data: profile, error } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        // Now we can safely set all the state at once.
         setIsAuthenticated(true);
-        setCurrentUser(session.user);
-        setUserRole(session.user.user_metadata?.role);
+        setCurrentUser(user);
+        
+        if (error) {
+          console.error("Critical Error: Could not fetch user role.", error.message);
+          setUserRole(null);
+        } else {
+          setUserRole(profile?.role?.toLowerCase() ?? null);
+        }
+      } else {
+        // If no session, clear everything.
+        setIsAuthenticated(false);
+        setCurrentUser(null);
+        setUserRole(null);
       }
+      
+      // This is the key: loading is only finished AFTER all checks are complete.
       setLoadingSession(false);
     };
-    checkSession();
+
+    setupSession();
+
+    // The listener handles subsequent changes (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-      setCurrentUser(session?.user ?? null);
-      setUserRole(session?.user?.user_metadata?.role ?? null);
+        // We can simplify the listener to just re-run the main setup.
+        // This is a bit redundant but extremely safe.
+        setupSession();
     });
+
     return () => subscription.unsubscribe();
   }, []);
+  // ====================================================================================
 
   const handleLogin = (role) => {
-    setIsAuthenticated(true);
-    setUserRole(role);
-    navigate('/landing');
+    const lowerCaseRole = role ? role.toLowerCase() : null;
+    
+    if (lowerCaseRole === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (lowerCaseRole === 'faculty') {
+      navigate('/faculty/dashboard');
+    } else if (lowerCaseRole === 'student') {
+      navigate('/student/dashboard');
+    } else {
+      navigate('/landing');
+    }
   };
 
   const handleLogout = async () => {
@@ -71,55 +108,43 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // This loading guard now correctly waits for everything.
   if (loadingSession || showSplash) {
     return <LogoSplash />;
   }
 
+  // All your routing logic below is now guaranteed to receive the correct, fully-loaded props.
   return (
     <Routes>
       {isAuthenticated ? (
         <>
-          {/* --- This is the complete and final map of all your app's pages --- */}
-
-          {/* Core Routes */}
-          <Route path="/landing" element={<LandingPage onLogout={handleLogout} />} />
+          <Route path="/landing" element={<LandingPage onLogout={handleLogout} userRole={userRole} />} />
           <Route path="/profile" element={<ProfilePage user={currentUser} onLogout={handleLogout} />} />
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/calendar" element={<SmartCalendar user={currentUser} onLogout={handleLogout} />} />
-          
-          {/* Dashboard Routes */}
           <Route path="/dashboard" element={<DashboardRouter role={userRole} />} />
           <Route path="/student/dashboard" element={<StudentDashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/faculty/dashboard" element={<FacultyDashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/admin/dashboard" element={<AdminDashboard currentUser={currentUser} onLogout={handleLogout} />} />
-
-          {/* Assignment Routes */}
-          <Route path="/student/assignments" element={<AssignmentList currentUser={currentUser} onLogout={handleLogout} />} />
+          
+          <Route path="/student/assignments" element={<AssignmentList currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
+          <Route path="/student/assignments/:id" element={<AssignmentFeedback currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/assignments/submit/:id" element={<AssignmentSubmit currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/faculty/assignments" element={<AssignmentList currentUser={currentUser} onLogout={handleLogout} />} />
+          <Route path="/faculty/assignments" element={<AssignmentList currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
+          
           <Route path="/faculty/assignments/create" element={userRole === 'faculty' ? <CreateAssignmentPage currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/landing" />} />
           <Route path="/faculty/assignments/evaluate/:id" element={userRole === 'faculty' ? <AssignmentEvaluate currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/landing" />} />
           
-          {/* Query Routes */}
           <Route path="/submit-query" element={<QueryForm currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/queries" element={<QueryListPage currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/faculty/queries" element={<QueryListPage currentUser={currentUser} onLogout={handleLogout} />} />
-
-          {/* ========================== THE MISSING ROUTES ARE NOW ADDED ========================== */}
-          
-          {/* Activity Routes */}
           <Route path="/activities-hub" element={<ActivityHub currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/activities" element={<ActivityPoints currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/activities/submit" element={<SubmitCertificate currentUser={currentUser} onLogout={handleLogout} />} />
-
-          {/* ======================================================================================= */}
-          
-          {/* This catch-all route MUST be the last private route. */}
           <Route path="*" element={<Navigate to="/landing" />} />
         </>
       ) : (
         <>
-          {/* Public Routes */}
           <Route path="/" element={<LandingPage />} /> 
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
