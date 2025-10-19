@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../dashboard/Dashboard.css'; // For the shared header style
+import Sidebar from '../common/SideBar';
+import Navbar from '../common/Navbar';
 import './ActivityHub.css'; 
 
-const ActivityHub = () => {
+const ActivityHub = ({ onLogout }) => {
   return (
     <div className="layout-wrapper">
-      {/* You can add your <Sidebar /> here if you want it on this page */}
-      <main className="main-content-wrapper full-width">
-        <div className="page-content">
+      <Sidebar userRole="student" />
+      <div className="main-content-wrapper">
+        <Navbar userName="John Doe" userRole="Student" onLogout={onLogout} />
+        <main className="page-content">
           <div className="page-header">
             <div>
               <h1 className="page-title"><span className="gradient-text">Activity Points</span></h1>
@@ -31,8 +33,8 @@ const ActivityHub = () => {
               <span className="hub-arrow">→</span>
             </Link>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

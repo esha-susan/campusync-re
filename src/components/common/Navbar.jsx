@@ -1,37 +1,60 @@
+import React, { useState, useEffect } from 'react';
+import { getNotificationsForUser } from '../../services/notificationService';
+import NotificationPanel from './NotificationPanel';
+import './Navbar.css'; // This CSS will be replaced
 
-import React from 'react';
-import { Link } from 'react-router-dom'; // Make sure Link is imported
-import './Navbar.css';
+const Navbar = ({ userName, userRole, onLogout }) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
-const Navbar = ({ userName, userRole }) => {
+  const mockUserId = userRole === 'student' ? 101 : 201;
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const data = await getNotificationsForUser(userRole, mockUserId);
+      setNotifications(data);
+      setHasUnread(data.some(n => !n.read));
+    };
+    fetchNotifications();
+  }, [userRole, mockUserId]);
+
   return (
-    <header className="navbar-container">
-      {/* --- 1. ADDED LOGO WITH LINK TO LANDING PAGE --- */}
-      <Link to="/landing" className="navbar-logo">
-        <div className="logo-icon">C</div>
-        <span>Campusync</span>
-      </Link>
+    <>
+      <header className="navbar-container">
+        <div className="navbar-section navbar-left"></div>
 
-      <div className="navbar-right-section">
-        <div className="search-bar">
-          <span className="search-icon">🔍</span>
-          <input type="text" placeholder="Search..." />
-        </div>
-        <div className="navbar-profile">
-          <div className="notification-bell">
-            <span>🔔</span>
-            <div className="notification-dot">2</div>
+        <div className="navbar-section navbar-center">
+          <div className="search-bar">
+            <span className="search-icon">🔍</span>
+            <input type="text" placeholder="Search..." />
           </div>
-          <div className="user-info">
-            <div className="user-avatar">J</div>
-            <div>
-              <div className="user-name">{userName || 'John Doe'}</div>
-              <div className="user-role">{userRole || 'Student'}</div>
+        </div>
+
+        <div className="navbar-section navbar-right">
+          <div className="notification-bell" onClick={() => setShowNotifications(true)}>
+            <span className="bell-icon">🔔</span>
+            {hasUnread && <div className="unread-dot"></div>}
+          </div>
+
+          <div className="user-profile">
+            <div className="user-avatar">{userName ? userName.charAt(0) : 'U'}</div>
+            {/* Using simple divs for text for maximum style control */}
+            <div className="user-text-info">
+              <div className="user-name">{userName || 'User'}</div>
+              <div className="user-role-nav">{userRole || 'Student'}</div>
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {showNotifications && (
+        <NotificationPanel
+          notifications={notifications}
+          onClose={() => setShowNotifications(false)}
+        />
+      )}
+    </>
   );
 };
 

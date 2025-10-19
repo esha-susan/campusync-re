@@ -31,6 +31,12 @@ const LandingPage = ({ onLogout }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Handler to prevent default link behavior for the logout action
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    onLogout();
+  };
+
   return (
     <div className="landing-page">
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
@@ -39,10 +45,11 @@ const LandingPage = ({ onLogout }) => {
             <span className="logo-icon">C</span>
             <span className="logo-name">Campusync</span>
           </div>
+          {/* FINAL MODIFICATION: All items are links with the same class name */}
           <div className="nav-links">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/profile">Profile</Link>
-            <button onClick={onLogout} className="btn btn-primary">Logout</button>
+            <Link to="/dashboard" className="nav-item">Dashboard</Link>
+            <Link to="/profile" className="nav-item">Profile</Link>
+            <a href="#" onClick={handleLogoutClick} className="nav-item">Logout</a>
           </div>
         </div>
       </nav>
@@ -69,7 +76,6 @@ const LandingPage = ({ onLogout }) => {
           <div className="pillars-grid">
             <div className="pillar-card animate-on-scroll">
               <div className="pillar-icon">
-                {/* SVG Icon for Academics */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
               </div>
               <h3 className="pillar-title">Streamlined Academics</h3>
@@ -79,7 +85,6 @@ const LandingPage = ({ onLogout }) => {
             </div>
             <div className="pillar-card animate-on-scroll">
               <div className="pillar-icon">
-                {/* SVG Icon for Communication */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
               </div>
               <h3 className="pillar-title">Seamless Communication</h3>
@@ -89,8 +94,7 @@ const LandingPage = ({ onLogout }) => {
             </div>
             <div className="pillar-card animate-on-scroll">
               <div className="pillar-icon">
-                 {/* SVG Icon for Development/Growth */}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-2.25M21 18l-3.75-2.25m0 0l-3.75 2.25M15 12l5.25-3M15 12v6" /></svg>
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-2.25M21 18l-3.75-2.25m0 0l-3.75 2.25M15 12l5.25-3M15 12v6" /></svg>
               </div>
               <h3 className="pillar-title">Holistic Development</h3>
               <p className="pillar-description">

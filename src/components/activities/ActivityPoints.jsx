@@ -1,69 +1,88 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Sidebar from '../common/SideBar';
 import Navbar from '../common/Navbar';
-import './ActivityPoints.css';
+import Sidebar from '../common/SideBar';
+import Footer from '../common/Footer';
+import './ActivityPoints.css'; // We will create this CSS file
 
 const ActivityPoints = ({ onLogout }) => {
-  const [filter, setFilter] = useState('all');
-  const activities = [
-    { id: 1, activity: 'Hackathon Winner', category: 'Technical', points: 15, date: '2025-09-25', status: 'approved' },
-    { id: 2, activity: 'Paper Presentation', category: 'Academic', points: 10, date: '2025-09-22', status: 'pending' },
-    { id: 3, activity: 'Workshop Participation', category: 'Technical', points: 5, date: '2025-09-20', status: 'approved' },
-    { id: 4, activity: 'Sports Champion', category: 'Sports', points: 12, date: '2025-09-18', status: 'rejected', reason: 'Certificate not clear' },
+  const [activeFilter, setActiveFilter] = useState('All');
+
+  // Mock data that matches the screenshot
+  const allActivities = [
+    { title: 'Hackathon Winner', category: 'Technical', date: '2025-09-25', points: 15, status: 'Approved' },
+    { title: 'Paper Presentation', category: 'Academic', date: '2025-09-22', points: 10, status: 'Pending' },
+    { title: 'Workshop Participation', category: 'Technical', date: '2025-09-20', points: 5, status: 'Approved' },
+    { title: 'Sports Champion', category: 'Sports', date: '2025-09-18', points: 12, status: 'Rejected' },
   ];
 
-  const filteredActivities = activities.filter(a => filter === 'all' || a.status === filter);
-  const totalPoints = activities.filter(a => a.status === 'approved').reduce((sum, a) => sum + a.points, 0);
-  const pendingPoints = activities.filter(a => a.status === 'pending').reduce((sum, a) => sum + a.points, 0);
+  const filteredActivities = allActivities.filter(activity => {
+    if (activeFilter === 'All') return true;
+    return activity.status === activeFilter;
+  });
+
+  const filterOptions = ['All', 'Approved', 'Pending', 'Rejected'];
 
   return (
     <div className="layout-wrapper">
       <Sidebar userRole="student" />
       <div className="main-content-wrapper">
-        <Navbar userName="John Doe" userRole="Student" />
+        <Navbar userName="John Doe" userRole="Student" onLogout={onLogout} />
         <main className="page-content">
           <div className="page-header">
             <div>
               <h1 className="page-title">Activity Points</h1>
               <p className="page-subtitle">Track your co-curricular achievements</p>
             </div>
-            <Link to="/student/activities/submit" className="btn btn-primary">+ Submit Certificate</Link>
+            <Link to="/student/activities/submit" className="btn-primary">
+              + Submit Certificate
+            </Link>
           </div>
 
-          <div className="points-summary">
-            <div className="summary-card"><div className="summary-details"><h3 className="summary-value">{totalPoints}</h3><p className="summary-label">Total Points</p></div></div>
-            <div className="summary-card"><div className="summary-details"><h3 className="summary-value">{pendingPoints}</h3><p className="summary-label">Pending Approval</p></div></div>
-            <div className="summary-card"><div className="summary-details"><h3 className="summary-value">{activities.filter(a => a.status === 'approved').length}</h3><p className="summary-label">Approved Activities</p></div></div>
-            <div className="summary-card"><div className="summary-details"><h3 className="summary-value">{Math.round((totalPoints / 100) * 100)}%</h3><p className="summary-label">Target (100pts)</p></div></div>
+          <div className="summary-bar">
+            <div className="summary-item"><span>20</span>Total Points</div>
+            <div className="summary-item"><span>10</span>Pending Approval</div>
+            <div className="summary-item"><span>2</span>Approved Activities</div>
+            <div className="summary-item"><span>20%</span>Target (100pts)</div>
           </div>
 
-          <div className="activities-list-container">
-            <div className="filter-tabs">
-              <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
-              <button className={`filter-btn ${filter === 'approved' ? 'active' : ''}`} onClick={() => setFilter('approved')}>Approved</button>
-              <button className={`filter-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>Pending</button>
-              <button className={`filter-btn ${filter === 'rejected' ? 'active' : ''}`} onClick={() => setFilter('rejected')}>Rejected</button>
-            </div>
-            <div className="activities-list">
-              {filteredActivities.map(activity => (
-                <div key={activity.id} className="activity-item">
-                  <div className="activity-info">
-                    <h4 className="activity-name">{activity.activity}</h4>
-                    <div className="activity-meta">
-                      <span className="category-badge">{activity.category}</span>
-                      <span>📅 {activity.date}</span>
-                    </div>
-                  </div>
-                  <div className="activity-status-section">
-                    <span className="points-display">+{activity.points} pts</span>
-                    <span className={`status-badge status-${activity.status}`}>{activity.status}</span>
-                  </div>
-                </div>
+          <div className="activities-card">
+            <div className="filter-bar">
+              {filterOptions.map(filter => (
+                <button
+                  key={filter}
+                  className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
+                  onClick={() => setActiveFilter(filter)}
+                >
+                  {filter}
+                </button>
               ))}
             </div>
+
+            <ul className="activities-list">
+              {filteredActivities.map((activity, index) => (
+                <li key={index} className="activity-item">
+                  <div className="activity-info">
+                    <h4 className="activity-title">{activity.title}</h4>
+                    <div className="activity-meta">
+                      <span className={`category-tag ${activity.category.toLowerCase()}`}>{activity.category}</span>
+                      <span className="activity-date">{activity.date}</span>
+                    </div>
+                  </div>
+                  <div className="activity-status">
+                    <span className={`points points-${activity.status.toLowerCase()}`}>
+                      +{activity.points} pts
+                    </span>
+                    <span className={`status-badge status-${activity.status.toLowerCase()}`}>
+                      {activity.status}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );
