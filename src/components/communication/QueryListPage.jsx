@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// --- This import now works because you created the file in the step above ---
 import { getQueriesForRole } from '../../services/queryService'; 
-
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
+import Footer from '../common/Footer';
 import './QueryList.css';
 
-const QueryListPage = ({ userRole, onLogout }) => {
+const QueryListPage = ({ currentUser, userRole, onLogout }) => {
   const [queries, setQueries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchQueries = async () => {
+      if (!userRole) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
       try {
-        const data = await getQueriesForRole(userRole);
-        setQueries(data);
+        const data = await getQueriesForRole();
+        setQueries(data || []);
       } catch (err) {
         setError('Failed to load queries. Please try again.');
         console.error(err);
@@ -28,7 +33,6 @@ const QueryListPage = ({ userRole, onLogout }) => {
     fetchQueries();
   }, [userRole]);
 
-  // Role-Specific UI Content
   const pageDetails = {
     title: userRole === 'student' ? 'My Queries' : 'Query Inbox',
     subtitle: userRole === 'student' 
@@ -36,12 +40,11 @@ const QueryListPage = ({ userRole, onLogout }) => {
       : 'Review, manage, and respond to all user queries.',
   };
 
-  // Role-Specific Header Action
   const HeaderAction = () => {
     if (userRole === 'student') {
       return (
         <Link to="/submit-query" className="btn btn-primary">
-          Submit a New Query
+          + Submit New Query
         </Link>
       );
     }
@@ -51,10 +54,11 @@ const QueryListPage = ({ userRole, onLogout }) => {
   const renderContent = () => {
     if (isLoading) return <div className="loading-indicator">Loading queries...</div>;
     if (error) return <div className="error-message">{error}</div>;
+    
     if (queries.length === 0) {
       const message = userRole === 'student' 
         ? "You haven't submitted any queries yet." 
-        : "The query inbox is empty.";
+        : "The query inbox is empty. Great job!";
       return <div className="no-assignments">{message}</div>;
     }
 
@@ -109,24 +113,30 @@ const QueryListPage = ({ userRole, onLogout }) => {
     <div className="layout-wrapper">
       <Sidebar userRole={userRole} />
       <div className="main-content-wrapper">
-        <Navbar userName="User" userRole={userRole} onLogout={onLogout} />
+        <Navbar 
+          userName={currentUser?.email} 
+          userRole={userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ''} 
+          onLogout={onLogout} 
+        />
         <main className="page-content">
           <div className="page-header">
             <div className="page-title-group">
-              <div>
-                <h1 className="page-title">{pageDetails.title}</h1>
-                <p className="page-subtitle">{pageDetails.subtitle}</p>
-              </div>
+              <h1 className="page-title">{pageDetails.title}</h1>
+              <p className="page-subtitle">{pageDetails.subtitle}</p>
             </div>
+            {/* ======================= THIS IS THE CORRECTION ======================= */}
+            {/* The misplaced curly brace has been removed. */}
             <div className="page-header-actions">
               <HeaderAction />
             </div>
+            {/* ======================================================================= */}
           </div>
 
           <div className="query-list-container">
             {renderContent()}
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

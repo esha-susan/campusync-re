@@ -24,6 +24,7 @@ import QueryForm from './components/communication/QueryForm';
 import ActivityHub from './components/activities/ActivityHub';
 import ActivityPoints from './components/activities/ActivityPoints';
 import SubmitCertificate from './components/activities/SubmitCertificate';
+import QueryDetailPage from './components/communication/QueryDetailPage';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -34,49 +35,53 @@ function App() {
   const navigate = useNavigate();
 
   // ========================== THIS IS THE DEFINITIVE FIX ==========================
-  // This useEffect logic is rewritten to be robust and prevent all race conditions.
+  // This useEffect is now crash-proof and will always finish loading.
   useEffect(() => {
-    // This function handles the entire setup process in a linear, predictable way.
     const setupSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (session && session.user) {
-        // If a user session exists, we MUST fetch their role before proceeding.
-        const user = session.user;
-        
-        const { data: profile, error } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        if (session && session.user) {
+          const user = session.user;
+          
+          const { data: profile, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-        // Now we can safely set all the state at once.
-        setIsAuthenticated(true);
-        setCurrentUser(user);
-        
-        if (error) {
-          console.error("Critical Error: Could not fetch user role.", error.message);
-          setUserRole(null);
+          if (error) {
+            // Log the error but don't stop the app
+            console.error("Critical Error: Could not fetch user role.", error.message);
+            setUserRole(null);
+          } else {
+            setUserRole(profile?.role?.toLowerCase() ?? null);
+          }
+
+          setIsAuthenticated(true);
+          setCurrentUser(user);
         } else {
-          setUserRole(profile?.role?.toLowerCase() ?? null);
+          setIsAuthenticated(false);
+          setCurrentUser(null);
+          setUserRole(null);
         }
-      } else {
-        // If no session, clear everything.
+      } catch (e) {
+        // Catch any unexpected errors during the setup process
+        console.error("An unexpected error occurred during session setup:", e);
         setIsAuthenticated(false);
         setCurrentUser(null);
         setUserRole(null);
+      } finally {
+        // THIS IS THE KEY: This code will RUN NO MATTER WHAT, guaranteeing
+        // that the loading screen will always disappear.
+        setLoadingSession(false);
       }
-      
-      // This is the key: loading is only finished AFTER all checks are complete.
-      setLoadingSession(false);
     };
 
     setupSession();
 
-    // The listener handles subsequent changes (login/logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        // We can simplify the listener to just re-run the main setup.
-        // This is a bit redundant but extremely safe.
+        // Re-run the full setup on login/logout to ensure consistency
         setupSession();
     });
 
@@ -86,16 +91,10 @@ function App() {
 
   const handleLogin = (role) => {
     const lowerCaseRole = role ? role.toLowerCase() : null;
-    
-    if (lowerCaseRole === 'admin') {
-      navigate('/admin/dashboard');
-    } else if (lowerCaseRole === 'faculty') {
-      navigate('/faculty/dashboard');
-    } else if (lowerCaseRole === 'student') {
-      navigate('/student/dashboard');
-    } else {
-      navigate('/landing');
-    }
+    if (lowerCaseRole === 'admin') navigate('/admin/dashboard');
+    else if (lowerCaseRole === 'faculty') navigate('/faculty/dashboard');
+    else if (lowerCaseRole === 'student') navigate('/student/dashboard');
+    else navigate('/landing');
   };
 
   const handleLogout = async () => {
@@ -108,12 +107,11 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // This loading guard now correctly waits for everything.
   if (loadingSession || showSplash) {
     return <LogoSplash />;
   }
 
-  // All your routing logic below is now guaranteed to receive the correct, fully-loaded props.
+  // All your routing logic is now safe.
   return (
     <Routes>
       {isAuthenticated ? (
@@ -126,18 +124,17 @@ function App() {
           <Route path="/student/dashboard" element={<StudentDashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/faculty/dashboard" element={<FacultyDashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/admin/dashboard" element={<AdminDashboard currentUser={currentUser} onLogout={handleLogout} />} />
-          
           <Route path="/student/assignments" element={<AssignmentList currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
           <Route path="/student/assignments/:id" element={<AssignmentFeedback currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/assignments/submit/:id" element={<AssignmentSubmit currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/faculty/assignments" element={<AssignmentList currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
-          
           <Route path="/faculty/assignments/create" element={userRole === 'faculty' ? <CreateAssignmentPage currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/landing" />} />
           <Route path="/faculty/assignments/evaluate/:id" element={userRole === 'faculty' ? <AssignmentEvaluate currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/landing" />} />
-          
           <Route path="/submit-query" element={<QueryForm currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/student/queries" element={<QueryListPage currentUser={currentUser} onLogout={handleLogout} />} />
-          <Route path="/faculty/queries" element={<QueryListPage currentUser={currentUser} onLogout={handleLogout} />} />
+          <Route path="/student/queries/:id" element={<QueryDetailPage currentUser={currentUser} userRole="student" onLogout={handleLogout} />} />
+          <Route path="/faculty/queries/:id" element={<QueryDetailPage currentUser={currentUser} userRole="faculty" onLogout={handleLogout} />} />
+          <Route path="/student/queries" element={<QueryListPage currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
+          <Route path="/faculty/queries" element={<QueryListPage currentUser={currentUser} userRole={userRole} onLogout={handleLogout} />} />
           <Route path="/activities-hub" element={<ActivityHub currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/activities" element={<ActivityPoints currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/student/activities/submit" element={<SubmitCertificate currentUser={currentUser} onLogout={handleLogout} />} />

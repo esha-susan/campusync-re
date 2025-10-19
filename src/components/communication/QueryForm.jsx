@@ -1,54 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './QueryForm.css';
+import { submitQuery, getQueryRecipients } from '../../services/queryService';
 
-const QueryForm = ({ onLogout }) => {
+const QueryForm = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    recipient: '',
+    recipient_id: '', // State now holds the UUID of the recipient
     subject: '',
     category: '',
     priority: 'medium',
     message: '',
-    attachment: null
   });
+
+  // State for the dynamic dropdown
+  const [recipients, setRecipients] = useState([]);
+  const [isLoadingRecipients, setIsLoadingRecipients] = useState(true);
+
+  // State for file handling and submission status
+  const [attachment, setAttachment] = useState(null);
   const [fileName, setFileName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const recipients = ['Faculty - Dr. Sarah Wilson', 'Faculty - Dr. John Smith', 'Admin - Academic Office', 'Admin - Examination Cell'];
+  // List of categories can remain hardcoded as it's static
   const categories = ['Academic', 'Assignment', 'Examination', 'General', 'Technical', 'Administrative'];
+
+  // This useEffect hook fetches the list of faculty/admins when the component first loads.
+  useEffect(() => {
+    const fetchRecipients = async () => {
+      try {
+        const recipientData = await getQueryRecipients();
+        setRecipients(recipientData);
+      } catch (error) {
+        console.error("Could not load recipient list:", error);
+        // Optionally, show an error message to the user
+      } finally {
+        setIsLoadingRecipients(false);
+      }
+    };
+    fetchRecipients();
+  }, []); // The empty array ensures this runs only once.
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, attachment: file });
+      setAttachment(file);
       setFileName(file.name);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.recipient || !formData.subject || !formData.category || !formData.message) {
+    if (!formData.recipient_id || !formData.subject || !formData.category || !formData.message) {
       alert('Please fill in all required fields');
       return;
     }
 
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      // We pass the formData (which contains recipient_id) and the student's ID
+      await submitQuery(formData, currentUser.id);
+      
       alert('Query submitted successfully! You will receive a response soon.');
-      navigate('/student/dashboard');
-    }, 1500);
+      navigate('/student/queries'); // Redirect to the list to see the new query
+    } catch (error) {
+        alert('Failed to submit query. Please try again.');
+    } finally {
+        setSubmitting(false);
+    }
   };
 
   return (
     <div className="layout-wrapper">
       <Sidebar userRole="student" />
       <div className="main-content-wrapper">
-        <Navbar userName="John Doe" userRole="Student" onLogout={onLogout} />
+        <Navbar userName={currentUser?.email} userRole="Student" onLogout={onLogout} />
         <main className="page-content">
           <div className="page-header">
             <div>
@@ -64,13 +94,19 @@ const QueryForm = ({ onLogout }) => {
                   <label htmlFor="recipient" className="form-label">Send To *</label>
                   <select
                     id="recipient"
-                    value={formData.recipient}
-                    onChange={(e) => setFormData({ ...formData, recipient: e.target.value })}
+                    value={formData.recipient_id}
+                    onChange={(e) => setFormData({ ...formData, recipient_id: e.target.value })}
                     className="form-select"
+                    disabled={isLoadingRecipients}
+                    required
                   >
-                    <option value="">Select Recipient</option>
+                    <option value="">
+                      {isLoadingRecipients ? 'Loading recipients...' : 'Select a recipient'}
+                    </option>
                     {recipients.map(recipient => (
-                      <option key={recipient} value={recipient}>{recipient}</option>
+                      <option key={recipient.value} value={recipient.value}>
+                        {recipient.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -83,6 +119,7 @@ const QueryForm = ({ onLogout }) => {
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       className="form-select"
+                      required
                     >
                       <option value="">Select Category</option>
                       {categories.map(cat => (
@@ -98,6 +135,7 @@ const QueryForm = ({ onLogout }) => {
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                       className="form-select"
+                      required
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -116,6 +154,7 @@ const QueryForm = ({ onLogout }) => {
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="form-input"
                     placeholder="Brief description of your query"
+                    required
                   />
                 </div>
 
@@ -128,6 +167,7 @@ const QueryForm = ({ onLogout }) => {
                     className="form-textarea"
                     placeholder="Describe your query in detail..."
                     rows="8"
+                    required
                   ></textarea>
                 </div>
 
@@ -151,7 +191,7 @@ const QueryForm = ({ onLogout }) => {
                             className="remove-file"
                             onClick={() => {
                               setFileName('');
-                              setFormData({ ...formData, attachment: null });
+                              setAttachment(null);
                             }}
                           >
                             ✕

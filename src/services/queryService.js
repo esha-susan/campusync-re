@@ -1,54 +1,76 @@
-// This file acts as a fake database or API for handling queries.
+import { supabase } from '../../Supabaseclient';
 
-// --- MOCK DATA ---
-const allQueries = [
-    { id: 1, studentId: 101, studentName: 'John Doe', subject: 'Doubt regarding deadlock prevention', queryText: "Hi, I'm having trouble understanding the difference between deadlock prevention and avoidance. Can you provide a simple example?", category: 'Academic', priority: 'high', status: 'pending', date: '2025-10-17', responses: [] },
-    { id: 2, studentId: 102, studentName: 'Jane Smith', subject: 'Fee payment confirmation issue', queryText: "I paid my fees yesterday but the portal still shows 'Pending'. Can you please check on this?", category: 'Administrative', priority: 'urgent', status: 'pending', date: '2025-10-17', responses: [] },
-    { id: 3, studentId: 101, studentName: 'John Doe', subject: 'Question about transaction isolation in SQL', queryText: "What is the practical difference between 'Read Committed' and 'Repeatable Read' isolation levels?", category: 'Assignment', priority: 'medium', status: 'answered', date: '2025-10-16', responses: [{ author: 'Dr. Wilson', text: "Great question! 'Read Committed' prevents dirty reads, while 'Repeatable Read' also prevents non-repeatable reads. I've attached a link to a helpful article in the portal.", date: '2025-10-16' }] },
-    { id: 4, studentId: 103, studentName: 'Alice Brown', subject: 'Unable to upload certificate', queryText: "The system gives me an error every time I try to upload my PDF certificate for the recent workshop.", category: 'Technical', priority: 'high', status: 'pending', date: '2025-10-15', responses: [] },
-  ];
-  
-  const currentStudentId = 101;
-  
-  export const getQueriesForRole = (userRole) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (userRole === 'student') {
-          resolve(allQueries.filter(q => q.studentId === currentStudentId));
-        } else {
-          resolve(allQueries);
-        }
-      }, 500);
-    });
+// ... (submitQuery, getQueriesForRole, getQueryRecipients are all correct)
+
+// ======================= THIS IS THE DEFINITIVE FIX =======================
+/**
+ * Fetches the full details of a single query using a secure database function.
+ */
+export const getQueryById = async (queryId) => {
+  const { data, error } = await supabase.rpc('get_query_details_by_id', {
+    p_query_id: queryId
+  });
+
+  if (error || !data || data.length === 0) {
+    console.error("Error calling RPC get_query_details_by_id:", error);
+    // Throw a specific error if the query is not found
+    throw new Error('Query not found.');
+  }
+
+  const queryData = data[0]; // RPC returns an array, we need the first item
+
+  // Reformat the data to be easier to use in the component
+  return {
+    id: queryData.id,
+    subject: queryData.subject,
+    studentName: queryData.student_full_name || 'Unknown Student',
+    category: queryData.category,
+    date: new Date(queryData.created_at).toLocaleString(),
+    status: queryData.status,
+    queryText: queryData.message,
+    attachmentUrl: queryData.attachment_url,
+    responses: queryData.responses || [],
   };
-  
-  export const getQueryById = (queryId) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const query = allQueries.find(q => q.id === parseInt(queryId));
-        if (query) {
-          resolve(query);
-        } else {
-          reject(new Error('Query not found.'));
-        }
-      }, 300);
-    });
+};
+// ========================================================================
+
+
+/**
+ * Posts a new response to a query and updates its status.
+ */
+export const postQueryResponse = async (queryId, responseText, authorName, newStatus = 'answered') => {
+  const { data: currentQuery, error: fetchError } = await supabase
+    .from('queries')
+    .select('responses')
+    .eq('id', queryId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const newResponse = {
+    author: authorName,
+    text: responseText,
+    date: new Date().toISOString(),
   };
-  
-  export const postQueryResponse = (queryId, responseText) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const queryIndex = allQueries.findIndex(q => q.id === parseInt(queryId));
-        if (queryIndex !== -1) {
-          const newResponse = {
-            author: 'Dr. Wilson',
-            text: responseText,
-            date: new Date().toISOString().split('T')[0],
-          };
-          allQueries[queryIndex].responses.push(newResponse);
-          allQueries[queryIndex].status = 'answered';
-          resolve(allQueries[queryIndex]);
-        }
-      }, 700);
-    });
-  };
+
+  const updatedResponses = [...(currentQuery.responses || []), newResponse];
+
+  const { data, error: updateError } = await supabase
+    .from('queries')
+    .update({
+      responses: updatedResponses,
+      status: newStatus,
+    })
+    .eq('id', queryId)
+    .select()
+    .single();
+
+  if (updateError) {
+    console.error("Error posting query response:", updateError);
+    throw updateError;
+  }
+
+  return data;
+};
+
+// ... (The rest of your service file is correct)

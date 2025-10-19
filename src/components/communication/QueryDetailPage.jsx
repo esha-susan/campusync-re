@@ -1,36 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getQueryById, postQueryResponse } from '../../services/queryService';
-
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
-import './QueryDetailPage.css'; // Make sure this CSS file exists
+import Footer from '../common/Footer';
+import './QueryDetailPage.css'; // We will create this CSS file next
 
-const QueryDetailPage = ({ userRole, onLogout }) => {
+const QueryDetailPage = ({ currentUser, userRole, onLogout }) => {
   const { id } = useParams();
   const [query, setQuery] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // State for the faculty's response form
   const [newResponse, setNewResponse] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const fetchQuery = async () => {
-      // Reset state for safety on component remount
-      setQuery(null);
-      setError(null);
+  // Use useCallback to create a stable function for fetching data
+  const fetchQueryDetails = useCallback(async () => {
+    try {
       setIsLoading(true);
-      try {
-        const data = await getQueryById(id);
-        setQuery(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchQuery();
+      const data = await getQueryById(id);
+      setQuery(data);
+    } catch (err) {
+      setError('Failed to load query details.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchQueryDetails();
+  }, [fetchQueryDetails]);
 
   const handleSubmitResponse = async (e) => {
     e.preventDefault();
@@ -38,10 +40,12 @@ const QueryDetailPage = ({ userRole, onLogout }) => {
 
     setIsSubmitting(true);
     try {
-      await postQueryResponse(id, newResponse);
-      const updatedQuery = await getQueryById(id); // Refetch to see the update
-      setQuery(updatedQuery);
-      setNewResponse(''); // Clear the form
+      // Pass the query ID, the response text, and the faculty's name
+      await postQueryResponse(id, newResponse, currentUser.email); // Using email as author name
+      
+      // Clear the form and re-fetch the data to show the new message
+      setNewResponse('');
+      fetchQueryDetails();
     } catch (err) {
       alert("Failed to post response. Please try again.");
     } finally {
@@ -49,28 +53,15 @@ const QueryDetailPage = ({ userRole, onLogout }) => {
     }
   };
 
-  // --- SAFE RENDER LOGIC ---
-  // These checks run before attempting to render the main content.
-  if (isLoading) {
-    return <div className="loading-indicator">Loading query details...</div>;
-  }
+  if (isLoading) return <div className="loading-indicator">Loading query details...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!query) return <div className="error-message">Query not found.</div>;
 
-  if (error) {
-    return <div className="error-message">Error: {error}</div>;
-  }
-
-  // **THE CRASH FIX IS HERE**: We check if the query is null AFTER loading and error checks.
-  // This prevents the app from trying to read properties of a null object.
-  if (!query) {
-    return <div className="error-message">Query not found. It may have been deleted or the link is incorrect.</div>;
-  }
-
-  // If we get here, it is safe to render the query details.
   return (
     <div className="layout-wrapper">
       <Sidebar userRole={userRole} />
       <div className="main-content-wrapper">
-        <Navbar userName="User" userRole={userRole} onLogout={onLogout} />
+        <Navbar userName={currentUser?.email} userRole={userRole.charAt(0).toUpperCase() + userRole.slice(1)} onLogout={onLogout} />
         <main className="page-content">
           <div className="page-header">
             <Link to={userRole === 'student' ? '/student/queries' : '/faculty/queries'} className="back-link">
@@ -82,21 +73,25 @@ const QueryDetailPage = ({ userRole, onLogout }) => {
           <div className="query-detail-container">
             <div className="query-header-card">
               <h3>{query.subject}</h3>
-              <p>From: <strong>{query.studentName}</strong> | Category: {query.category} | Date: {query.date}</p>
-              <span className={`status-badge status-${query.status}`}>{query.status}</span>
+              <p>From: <strong>{query.studentName}</strong> | Category: {query.category}</p>
+              <div className="header-meta">
+                <span className={`status-badge status-${query.status}`}>{query.status}</span>
+                <span className="query-date">Submitted on: {query.date}</span>
+              </div>
             </div>
 
             <div className="conversation-thread">
               <div className="message original-query">
                 <div className="message-author">{query.studentName} (Student)</div>
                 <div className="message-text">{query.queryText}</div>
-                <div className="message-time">{query.date}</div>
+                <div className="message-time">{new Date(query.date).toLocaleString()}</div>
               </div>
+              
               {query.responses.map((response, index) => (
                 <div key={index} className="message faculty-response">
-                  <div className="message-author">{response.author} (Faculty)</div>
+                  <div className="message-author">{response.author} (Faculty/Admin)</div>
                   <div className="message-text">{response.text}</div>
-                  <div className="message-time">{response.date}</div>
+                  <div className="message-time">{new Date(response.date).toLocaleString()}</div>
                 </div>
               ))}
             </div>
@@ -112,6 +107,7 @@ const QueryDetailPage = ({ userRole, onLogout }) => {
                     placeholder="Type your response here..."
                     rows="5"
                     disabled={isSubmitting}
+                    required
                   ></textarea>
                   <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                     {isSubmitting ? 'Sending...' : 'Send Response'}
@@ -121,6 +117,7 @@ const QueryDetailPage = ({ userRole, onLogout }) => {
             )}
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );
