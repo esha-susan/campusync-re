@@ -25,6 +25,7 @@ import ActivityHub from './components/activities/ActivityHub';
 import ActivityPoints from './components/activities/ActivityPoints';
 import SubmitCertificate from './components/activities/SubmitCertificate';
 import QueryDetailPage from './components/communication/QueryDetailPage';
+import Navbar from './components/common/Navbar';
 
 function App() {
   // ======================= THIS IS THE DEFINITIVE FIX =======================

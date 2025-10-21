@@ -7,6 +7,10 @@ const NotificationPanel = ({ notifications, onClose }) => {
     switch (type) {
       case 'ASSIGNMENT_NEW': return '📚';
       case 'ASSIGNMENT_GRADED': return '📝';
+      // --- ADD THESE TWO NEW CASES ---
+      case 'QUERY_NEW': return '📩';        // Icon for new queries to faculty
+      case 'QUERY_RESPONSE': return '💬'; // Icon for answered queries to students
+      // -----------------------------
       default: return '🔔';
     }
   };
