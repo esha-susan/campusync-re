@@ -1,16 +1,12 @@
 import React from 'react';
-import './NotificationPanel.css'; // We will create this CSS
+import { Link } from 'react-router-dom';
+import './NotificationPanel.css';
 
 const NotificationPanel = ({ notifications, onClose }) => {
-  // Simple function to get an icon based on notification type
   const getIcon = (type) => {
-    switch(type) {
-      case 'NEW_EVENT': return '📅';
+    switch (type) {
+      case 'ASSIGNMENT_NEW': return '📚';
       case 'ASSIGNMENT_GRADED': return '📝';
-      case 'CERTIFICATE_APPROVED': return '🏆';
-      case 'QUERY_RESPONSE': return '💬';
-      case 'QUERY_NEW': return '📩';
-      case 'CERTIFICATE_PENDING': return '⏳';
       default: return '🔔';
     }
   };
@@ -21,16 +17,19 @@ const NotificationPanel = ({ notifications, onClose }) => {
       <div className="notification-panel">
         <div className="panel-header">
           <h3>Notifications</h3>
-          {/* In a real app, a "Mark all as read" button would go here */}
         </div>
         <ul className="notification-list">
           {notifications.length > 0 ? (
             notifications.map(notif => (
-              <li key={notif.id} className={`notification-item ${!notif.read ? 'unread' : ''}`}>
-                <div className="notification-icon">{getIcon(notif.type)}</div>
+              <li key={notif.id} className={`notification-item ${!notif.is_read ? 'unread' : ''}`}>
+                <div className="notification-icon">{getIcon(notif.notification_type)}</div>
                 <div className="notification-content">
-                  <p className="notification-message">{notif.message}</p>
-                  <span className="notification-timestamp">{notif.timestamp}</span>
+                  <Link to={notif.target_url || '#'} className="notification-link" onClick={onClose}>
+                    <p className="notification-message">{notif.message}</p>
+                    <span className="notification-timestamp">
+                      {new Date(notif.created_at).toLocaleString()}
+                    </span>
+                  </Link>
                 </div>
               </li>
             ))

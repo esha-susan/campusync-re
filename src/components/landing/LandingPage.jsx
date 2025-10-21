@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
-// MODIFICATION 1: The component now accepts 'userRole' as a prop
 const LandingPage = ({ onLogout, userRole }) => {
   const [scrolled, setScrolled] = useState(false);
 
@@ -32,14 +31,22 @@ const LandingPage = ({ onLogout, userRole }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- FIX APPLIED HERE ---
   // Handler to prevent default link behavior for the logout action
   const handleLogoutClick = (e) => {
     e.preventDefault();
-    onLogout();
+    // 1. Safety check to prevent "TypeError: onLogout is not a function"
+    if (typeof onLogout === 'function') {
+      onLogout();
+    }
   };
+  // -------------------------
 
-  // MODIFICATION 2: Determine the correct dashboard path based on the user's role
+  // Determine the correct dashboard path based on the user's role
   const dashboardPath = userRole ? `/${userRole}/dashboard` : '/dashboard';
+
+  // Check if the user is authenticated (by checking if onLogout prop was passed)
+  const isAuthenticated = typeof onLogout === 'function';
 
   return (
     <div className="landing-page">
@@ -49,12 +56,25 @@ const LandingPage = ({ onLogout, userRole }) => {
             <span className="logo-icon">C</span>
             <span className="logo-name">Campusync</span>
           </div>
+          
+          {/* --- FIX APPLIED HERE: Conditional Navigation Links --- */}
           <div className="nav-links">
-            {/* MODIFICATION 3: The Dashboard Link now uses the dynamic 'dashboardPath' variable */}
-            <Link to={dashboardPath} className="nav-item">Dashboard</Link>
-            <Link to="/profile" className="nav-item">Profile</Link>
-            <a href="#" onClick={handleLogoutClick} className="nav-item">Logout</a>
+            {isAuthenticated ? (
+              // Links for Authenticated Users
+              <>
+                <Link to={dashboardPath} className="nav-item">Dashboard</Link>
+                <Link to="/profile" className="nav-item">Profile</Link>
+                <a href="#" onClick={handleLogoutClick} className="nav-item">Logout</a>
+              </>
+            ) : (
+              // Links for Guest Users
+              <>
+                <Link to="/login" className="btn btn-primary btn-small">Login</Link>
+                <Link to="/register" className="btn btn-secondary btn-small">Register</Link>
+              </>
+            )}
           </div>
+          {/* ---------------------------------------------------- */}
         </div>
       </nav>
 
