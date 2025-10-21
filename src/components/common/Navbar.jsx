@@ -3,10 +3,14 @@ import { getNotificationsForUser } from '../../services/notificationService';
 import NotificationPanel from './NotificationPanel';
 import './Navbar.css'; // This CSS will be replaced
 
-const Navbar = ({ userName, userRole, onLogout }) => {
+const Navbar = ({ currentUser, onLogout }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
+  // It is assumed your currentUser object has properties 'name' and 'role'
+  const userName = currentUser?.name;
+  const userRole = currentUser?.role;
 
   const mockUserId = userRole === 'student' ? 101 : 201;
 
@@ -16,7 +20,9 @@ const Navbar = ({ userName, userRole, onLogout }) => {
       setNotifications(data);
       setHasUnread(data.some(n => !n.read));
     };
-    fetchNotifications();
+    if (userRole) {
+      fetchNotifications();
+    }
   }, [userRole, mockUserId]);
 
   return (
@@ -42,7 +48,7 @@ const Navbar = ({ userName, userRole, onLogout }) => {
             {/* Using simple divs for text for maximum style control */}
             <div className="user-text-info">
               <div className="user-name">{userName || 'User'}</div>
-              <div className="user-role-nav">{userRole || 'Student'}</div>
+              <div className="user-role-nav">{userRole || 'Role'}</div>
             </div>
           </div>
         </div>

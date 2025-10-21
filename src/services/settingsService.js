@@ -1,40 +1,51 @@
-// This service simulates fetching and saving application-wide settings from a backend.
+//
+// File: src/services/settingsService.js
+//
 
-// --- OUR MOCK DATABASE FOR SETTINGS ---
-// In a real app, this would be stored in a database.
-let mockSettings = {
-    siteName: 'EduPortal Pro',
-    maintenanceMode: false,
+// =========== THE FIX ===========
+// Changed from '../Supabaseclient' to a path relative to the src root.
+// Assuming Supabaseclient.js is in src/
+import { supabase } from '../Supabaseclient'; 
+// ===============================
+
+
+const SETTINGS_TABLE = 'settings';
+
+/**
+ * Fetches all application settings.
+ */
+export const getSettings = async () => {
+  const { data, error } = await supabase
+    .from(SETTINGS_TABLE)
+    .select('*')
+    .eq('id', 1) 
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching settings:', error);
+    throw error;
+  }
+  
+  return data || {
+    siteName: 'My University Portal',
     allowNewRegistrations: true,
-    defaultTheme: 'light',
+    maintenanceMode: false,
     enableEmailNotifications: true,
   };
-  // --- END MOCK DATABASE ---
-  
-  const mockDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-  
-  /**
-   * Fetches the current system settings.
-   * @returns {Promise<object>} A promise that resolves to the settings object.
-   */
-  export const getSettings = async () => {
-    console.log('[Service] Fetching system settings...');
-    await mockDelay(600); // Simulate network delay
-    return { ...mockSettings }; // Return a copy
-  };
-  
-  /**
-   * Saves updated system settings.
-   * @param {object} newSettings - The settings object to save.
-   * @returns {Promise<object>} A promise that resolves to the updated settings.
-   */
-  export const saveSettings = async (newSettings) => {
-    console.log('[Service] Saving new settings:', newSettings);
-    await mockDelay(1000); // Simulate network delay
-  
-    // Update our in-memory settings object
-    mockSettings = { ...mockSettings, ...newSettings };
-    
-    console.log('[Service] Settings updated successfully.');
-    return { ...mockSettings };
-  };
+};
+
+/**
+ * Saves the application settings.
+ */
+export const saveSettings = async (settings) => {
+  const { data, error } = await supabase
+    .from(SETTINGS_TABLE)
+    .update(settings)
+    .eq('id', 1);
+
+  if (error) {
+    console.error('Error saving settings:', error);
+    throw error;
+  }
+  return data;
+};

@@ -1,31 +1,36 @@
-// A mock database of existing users.
-const allUsers = [
-    { id: 101, name: 'John Doe', email: 'john.doe@example.com', role: 'student', department: 'CSE' },
-    { id: 201, name: 'Dr. Sarah Wilson', email: 'sarah.wilson@example.com', role: 'faculty', department: 'ECE' },
-    { id: 301, name: 'Admin User', email: 'admin@example.com', role: 'admin', department: 'Administration' },
-  ];
-  
-  /**
-   * Simulates creating a new user and adding them to our mock database.
-   * @param {object} userData - An object containing { name, email, role, department }.
-   * @returns {Promise<object>} A promise that resolves with the newly created user object.
-   */
-  export const createUser = (userData) => {
-    return new Promise((resolve, reject) => {
-      // Basic validation
-      if (!userData.name || !userData.email || !userData.role || !userData.department) {
-        return reject(new Error("All fields are required."));
-      }
-  
-      setTimeout(() => {
-        const newUser = {
-          id: Date.now(), // Create a unique ID based on the current timestamp
-          ...userData,
-        };
-        allUsers.push(newUser);
-        console.log("User Created:", newUser);
-        console.log("All Users:", allUsers);
-        resolve(newUser);
-      }, 800); // Simulate an 800ms network delay
-    });
-  };
+// In your services/userService.js file (or wherever the other functions are)
+import { supabase } from '../Supabaseclient';
+
+// --- Functions you already have ---
+// createUser, getAllUsers, deleteUser...
+
+// ======================= ADD THIS NEW FUNCTION =======================
+
+/**
+ * Fetches a single user's profile from the 'users' table.
+ * @param {string} userId - The UUID of the user from Supabase Auth.
+ */
+export const getUserProfile = async (userId) => {
+  // If no user is logged in, there's no profile to fetch.
+  if (!userId) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')      // The name of your table with user profiles
+      .select('*')        // Select all columns (name, role, department, etc.)
+      .eq('id', userId)   // Find the row where the 'id' matches the logged-in user's ID
+      .single();          // Expect to get only one record back
+
+    if (error) {
+      // This can happen if a user exists in auth but not in the users table yet.
+      console.error("Error fetching user profile:", error.message);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("An unexpected error occurred while fetching the profile:", error);
+    return null;
+  }
+};
+// ====================================================================

@@ -1,0 +1,19 @@
+/* This CSS makes the Sidebar and Main Content area work together */
+.layout-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--color-background);
+  }
+  
+  .main-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+  }
+  
+  .page-content {
+    flex-grow: 1;
+    padding: var(--space-lg);
+    overflow-y: auto; /* Allows only the content area to scroll */
+  }

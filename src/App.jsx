@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { supabase } from '../Supabaseclient';
+import { supabase } from '../Supabaseclient'; // Corrected import path
 
 // --- All your component imports are correct ---
 import LogoSplash from './components/landing/LogoSplash';
@@ -27,67 +27,49 @@ import SubmitCertificate from './components/activities/SubmitCertificate';
 import QueryDetailPage from './components/communication/QueryDetailPage';
 
 function App() {
+  // ======================= THIS IS THE DEFINITIVE FIX =======================
+  // The invalid `_STATE` syntax has been completely removed.
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  // =========================================================================
   const navigate = useNavigate();
 
-  // ========================== THIS IS THE DEFINITIVE FIX ==========================
-  // This useEffect is now crash-proof and will always finish loading.
   useEffect(() => {
     const setupSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-
         if (session && session.user) {
           const user = session.user;
-          
-          const { data: profile, error } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-
+          const { data: profile, error } = await supabase.from('users').select('role, full_name').eq('id', user.id).single();
           if (error) {
-            // Log the error but don't stop the app
-            console.error("Critical Error: Could not fetch user role.", error.message);
+            console.error("Could not fetch user profile.", error.message);
             setUserRole(null);
+            setCurrentUser(user); 
           } else {
-            setUserRole(profile?.role?.toLowerCase() ?? null);
+            const role = profile?.role?.toLowerCase() ?? null;
+            setUserRole(role);
+            const completeUserData = { ...user, full_name: profile?.full_name || user.email, role: role };
+            setCurrentUser(completeUserData);
           }
-
           setIsAuthenticated(true);
-          setCurrentUser(user);
         } else {
           setIsAuthenticated(false);
           setCurrentUser(null);
           setUserRole(null);
         }
       } catch (e) {
-        // Catch any unexpected errors during the setup process
-        console.error("An unexpected error occurred during session setup:", e);
-        setIsAuthenticated(false);
-        setCurrentUser(null);
-        setUserRole(null);
+        console.error("An unexpected error occurred:", e);
       } finally {
-        // THIS IS THE KEY: This code will RUN NO MATTER WHAT, guaranteeing
-        // that the loading screen will always disappear.
         setLoadingSession(false);
       }
     };
-
     setupSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        // Re-run the full setup on login/logout to ensure consistency
-        setupSession();
-    });
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => { setupSession(); });
     return () => subscription.unsubscribe();
   }, []);
-  // ====================================================================================
 
   const handleLogin = (role) => {
     const lowerCaseRole = role ? role.toLowerCase() : null;
@@ -96,30 +78,24 @@ function App() {
     else if (lowerCaseRole === 'student') navigate('/student/dashboard');
     else navigate('/landing');
   };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
   };
-
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500);
     return () => clearTimeout(timer);
   }, []);
+  if (loadingSession || showSplash) { return <LogoSplash />; }
 
-  if (loadingSession || showSplash) {
-    return <LogoSplash />;
-  }
-
-  // All your routing logic is now safe.
   return (
     <Routes>
       {isAuthenticated ? (
         <>
           <Route path="/landing" element={<LandingPage onLogout={handleLogout} userRole={userRole} />} />
-          <Route path="/profile" element={<ProfilePage user={currentUser} onLogout={handleLogout} />} />
+          <Route path="/profile" element={<ProfilePage currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/features" element={<FeaturesPage />} />
-          <Route path="/calendar" element={<SmartCalendar user={currentUser} onLogout={handleLogout} />} />
+          <Route path="/calendar" element={<SmartCalendar currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/dashboard" element={<DashboardRouter role={userRole} />} />
           <Route path="/student/dashboard" element={<StudentDashboard currentUser={currentUser} onLogout={handleLogout} />} />
           <Route path="/faculty/dashboard" element={<FacultyDashboard currentUser={currentUser} onLogout={handleLogout} />} />

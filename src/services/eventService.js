@@ -1,45 +1,53 @@
-// --- MOCK DATABASE FOR CALENDAR EVENTS ---
-// By declaring this with 'let' at the top level of the module,
-// it will persist as long as you don't do a full page refresh.
-let mockEvents = [
-    // --- CORRECTED DATES FOR OCTOBER 2025 ---
-    { id: 101, title: 'Database Systems Assignment Due', date: '2025-10-05', type: 'deadline', description: 'ER Diagram submission' },
-    { id: 102, title: 'Workshop on AI/ML', date: '2025-10-10', type: 'workshop', description: 'Introduction to Machine Learning' },
-    { id: 103, title: 'Tech Fest 2025', date: '2025-10-15', type: 'fest', description: 'Annual technical festival' },
-    { id: 104, title: 'Team Sync Meeting', date: '2025-10-19', type: 'meeting', description: 'Project status update' },
-    { id: 105, title: 'Cultural Night', date: '2025-10-25', type: 'cultural', description: 'Annual cultural program' }
-  ];
-  // --- END MOCK DATABASE ---
+import { supabase } from '../../Supabaseclient';
+
+/**
+ * Fetches all personal calendar notes for the currently logged-in user.
+ * The RLS policy in Supabase ensures they only get their own notes.
+ */
+export const getNotesForUser = async () => {
+  const { data, error } = await supabase
+    .from('calendar_notes')
+    .select('id, note_text, note_date');
+
+  if (error) {
+    console.error('Error fetching user notes:', error);
+    throw error;
+  }
   
-  const mockDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-  
-  /**
-   * Fetches all calendar events FROM our mock database.
-   */
-  export const getEvents = async () => {
-    console.log('[Service] Fetching events. Current count:', mockEvents.length);
-    await mockDelay(500);
-    // Return a copy of the array to prevent accidental mutation
-    return [...mockEvents];
+  // We format the data to match what the calendar component expects
+  return data.map(note => ({
+    id: `note-${note.id}`,
+    text: note.note_text,
+    date: note.note_date,
+    type: 'note',
+    priority: 'medium'
+  }));
+};
+
+/**
+ * Adds a new personal note for the currently logged-in user.
+ * @param {string} text - The content of the note.
+ * @param {string} date - The date for the note in 'YYYY-MM-DD' format.
+ * @param {string} userId - The ID of the user creating the note.
+ */
+export const addNoteForUser = async (text, date, userId) => {
+  const { data, error } = await supabase
+    .from('calendar_notes')
+    .insert([{ note_text: text, note_date: date, user_id: userId }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding note:', error);
+    throw error;
+  }
+
+  // Return the newly created note, formatted for the calendar
+  return {
+    id: `note-${data.id}`,
+    text: data.note_text,
+    date: data.note_date,
+    type: 'note',
+    priority: 'medium'
   };
-  
-  /**
-   * Creates a new event and ADDS IT to our mock database.
-   */
-  export const createEvent = async (eventData) => {
-    console.log('[Service] Attempting to create event:', eventData);
-    await mockDelay(800);
-  
-    const newEvent = {
-      id: Date.now(), // Unique ID
-      ...eventData,
-      // Ensure the type from the form is lowercase to match CSS classes
-      type: eventData.eventType ? eventData.eventType.toLowerCase() : 'event',
-    };
-  
-    // This is the most important line: it modifies the array.
-    mockEvents.push(newEvent);
-    
-    console.log('[Service] Event created. New count:', mockEvents.length);
-    return newEvent;
-  };
+};

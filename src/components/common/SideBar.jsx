@@ -1,10 +1,9 @@
-import React, { useState } from 'react'; // 1. Import useState
+import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import HelpModal from './HelpModal'; // 2. Import the new modal component
+import HelpModal from './HelpModal';
 import './SideBar.css';
 
 const Sidebar = ({ userRole }) => {
-  // 3. Add state to manage the modal's visibility
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // You can customize the menu items based on the userRole if needed
@@ -12,7 +11,11 @@ const Sidebar = ({ userRole }) => {
     { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
     { path: '/student/assignments', icon: '📚', label: 'Assignments' },
     { path: '/calendar', icon: '📅', label: 'Calendar' },
-    { path: '/activities', icon: '🏆', label: 'Activities' },
+    // ======================= THIS IS THE ONLY CHANGE =======================
+    // The path has been corrected from '/activities' to '/activities-hub'
+    // to match the route defined in your App.js file.
+    { path: '/activities-hub', icon: '🏆', label: 'Activities' },
+    // =======================================================================
     { path: '/student/queries', icon: '💬', label: 'My Queries' }
   ];
 
