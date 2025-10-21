@@ -5,6 +5,7 @@ import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './QueryList.css';
+import Layout from '../common/Layout';
 
 const QueryListPage = ({ currentUser, userRole, onLogout }) => {
   const [queries, setQueries] = useState([]);
@@ -63,6 +64,7 @@ const QueryListPage = ({ currentUser, userRole, onLogout }) => {
     }
 
     return (
+      
       <div className="table-wrapper">
         <table className="query-table">
           <thead>
@@ -106,18 +108,16 @@ const QueryListPage = ({ currentUser, userRole, onLogout }) => {
           </tbody>
         </table>
       </div>
+      
     );
   };
 
   return (
+    <Layout currentUser={currentUser} onLogout={onLogout}>
     <div className="layout-wrapper">
-      <Sidebar userRole={userRole} />
+      
       <div className="main-content-wrapper">
-        <Navbar 
-          userName={currentUser?.email} 
-          userRole={userRole ? userRole.charAt(0).toUpperCase() + userRole.slice(1) : ''} 
-          onLogout={onLogout} 
-        />
+        
         <main className="page-content">
           <div className="page-header">
             <div className="page-title-group">
@@ -139,6 +139,7 @@ const QueryListPage = ({ currentUser, userRole, onLogout }) => {
         <Footer />
       </div>
     </div>
+    </Layout>
   );
 };
 

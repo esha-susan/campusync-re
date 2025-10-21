@@ -4,11 +4,13 @@ import SideBar from '../common/SideBar';
 import Navbar from '../common/Navbar';
 import './AssignmentHub.css'; // New CSS for this page
 import './AssignmentEvaluate.css'
+import Layout from '../common/Layout';
 const AssignmentHub = () => {
   return (
+    <Layout currentUser={currentUser} onLogout={onLogout}>
     <div className="dashboard-layout">
-        <SideBar userRole={userRole} />
-        <Navbar userName="John Doe" userRole="Student" /> 
+        
+        
       <main className="dashboard-main">
         <div className="dashboard-content-wide">
           <div className="page-header">
@@ -36,6 +38,7 @@ const AssignmentHub = () => {
         </div>
       </main>
     </div>
+    </Layout>
   );
 };
 

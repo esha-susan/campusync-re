@@ -38,21 +38,37 @@ function App() {
   // =========================================================================
   const navigate = useNavigate();
 
+  
   useEffect(() => {
     const setupSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
           const user = session.user;
-          const { data: profile, error } = await supabase.from('users').select('role, full_name').eq('id', user.id).single();
+          
+          // --- THE DEFINITIVE FIX FOR THE "CANNOT COERCE" ERROR ---
+          // We now use .limit(1).single() which is safer and prevents the error
+          // if there are duplicate user rows for some reason.
+          const { data: profile, error } = await supabase
+            .from('users')
+            .select('role, full_name')
+            .eq('id', user.id)
+            .limit(1) // Fetch at most one row
+            .single(); // Expect a single object
+          // ---------------------------------------------------------
+
           if (error) {
             console.error("Could not fetch user profile.", error.message);
             setUserRole(null);
-            setCurrentUser(user); 
+            setCurrentUser(user); // Fallback to auth user data
           } else {
             const role = profile?.role?.toLowerCase() ?? null;
             setUserRole(role);
-            const completeUserData = { ...user, full_name: profile?.full_name || user.email, role: role };
+            const completeUserData = { 
+              ...user, 
+              full_name: profile?.full_name || user.email, 
+              role: role 
+            };
             setCurrentUser(completeUserData);
           }
           setIsAuthenticated(true);
@@ -62,7 +78,7 @@ function App() {
           setUserRole(null);
         }
       } catch (e) {
-        console.error("An unexpected error occurred:", e);
+        console.error("An unexpected error occurred during session setup:", e);
       } finally {
         setLoadingSession(false);
       }

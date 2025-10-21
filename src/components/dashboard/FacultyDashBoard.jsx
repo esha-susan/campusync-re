@@ -42,9 +42,9 @@ const FacultyDashboard = ({ currentUser, onLogout }) => {
 
   const stats = [
     { label: 'Pending Evaluations', value: isLoading ? '...' : assignmentsToEvaluate.length, icon: '📝', color: '#3b82f6' },
-    { label: 'Total Students', value: '150', icon: '👥', color: '#10b981' },
-    { label: 'Pending Queries', value: '8', icon: '💬', color: '#f59e0b' },
-    { label: 'Upcoming Classes', value: '5', icon: '📚', color: '#ef4444' }
+    { label: 'Total Students', value: '50', icon: '👥', color: '#10b981' },
+    { label: 'Pending Queries', value: '2', icon: '💬', color: '#f59e0b' },
+    
   ];
   const quickActions = [ { to: '/faculty/assignments/create', label: 'Create Assignment', icon: '➕' }, { to: '/calendar', label: 'View Calendar', icon: '📅' }, { to: '/faculty/assignments', label: 'Manage Assignments', icon: '👥' }, { to: '/faculty/queries', label: 'View Queries', icon: '💬' }];
   const recentQueries = [ { id: 1, student: 'John Doe', subject: 'Database Systems', query: 'Clarification on normalization concepts', time: '2 hours ago', status: 'pending' }, { id: 2, student: 'Jane Smith', subject: 'Operating Systems', query: 'Doubt regarding deadlock prevention', time: '5 hours ago', status: 'answered' }];

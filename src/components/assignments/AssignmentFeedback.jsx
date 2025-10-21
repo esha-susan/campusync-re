@@ -7,6 +7,7 @@ import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './AssignmentFeedback.css'; // You can create a simple CSS file for styling
+import Layout from '../common/Layout';
 
 const AssignmentFeedback = ({ currentUser, onLogout }) => {
   const { id: assignmentId } = useParams();
@@ -41,6 +42,7 @@ const AssignmentFeedback = ({ currentUser, onLogout }) => {
   }
 
   return (
+    <Layout currentUser={currentUser} onLogout={onLogout}>
     <div className="layout-wrapper">
       <Sidebar userRole="student" />
       <div className="main-content-wrapper">
@@ -76,6 +78,7 @@ const AssignmentFeedback = ({ currentUser, onLogout }) => {
         <Footer />
       </div>
     </div>
+    </Layout>
   );
 };
 

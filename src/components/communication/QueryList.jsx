@@ -5,6 +5,7 @@ import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar';
 import Footer from '../common/Footer';
 import './QueryList.css';
+import Layout from '../common/Layout';
 
 // The component is now correctly named QueryList
 const QueryList = ({ currentUser, userRole, onLogout }) => {
@@ -113,6 +114,7 @@ const QueryList = ({ currentUser, userRole, onLogout }) => {
   };
 
   return (
+    <Layout currentUser={currentUser} onLogout={onLogout}>
     <div className="layout-wrapper">
       <Sidebar userRole={userRole} />
       <div className="main-content-wrapper">
@@ -139,6 +141,7 @@ const QueryList = ({ currentUser, userRole, onLogout }) => {
         <Footer />
       </div>
     </div>
+    </Layout>
   );
 };
 

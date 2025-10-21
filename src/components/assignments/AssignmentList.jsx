@@ -4,6 +4,7 @@ import { getAllAssignments, getAssignmentsForFaculty, getStudentSubmissionStatus
 import Navbar from '../common/Navbar';
 import Sidebar from '../common/SideBar'; 
 import './AssignmentList.css'; 
+import Layout from '../common/Layout';
 
 const AssignmentList = ({ currentUser, userRole, onLogout }) => {
   const userId = currentUser?.id;
@@ -150,15 +151,12 @@ const AssignmentList = ({ currentUser, userRole, onLogout }) => {
   };
   
   return (
+    <Layout currentUser={currentUser} onLogout={onLogout}>
     <div className="layout-wrapper">
-      <Sidebar userRole={userRole} />
+     
       <div className="main-content-wrapper">
         <div className="navbar-container">
-          <Navbar 
-            userName={currentUser?.email}
-            userRole={userRole}
-            onLogout={onLogout} 
-          />
+         
         </div>
         <main className="page-content">
           <div className="page-header">
@@ -172,7 +170,9 @@ const AssignmentList = ({ currentUser, userRole, onLogout }) => {
         </main>
       </div>
     </div>
+    </Layout>
   );
+  
 };
 
 export default AssignmentList;

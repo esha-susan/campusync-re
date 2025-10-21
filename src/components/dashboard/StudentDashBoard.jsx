@@ -6,7 +6,7 @@ import Footer from '../common/Footer';
 import './Dashboard.css'; // Import the unified CSS
 
 const StudentDashboard = ({ onLogout }) => {
-  const stats = [ { label: 'Pending Assignments', value: '3', icon: '📝', color: '#3b82f6' }, { label: 'Activity Points', value: '750', icon: '⭐', color: '#10b981' }, { label: 'Answered Queries', value: '2', icon: '💬', color: '#f59e0b' }, { label: 'Upcoming Deadlines', value: '4', icon: '📅', color: '#ef4444' }];
+  const stats = [ { label: 'Pending Assignments', value: '3', icon: '📝', color: '#3b82f6' }, { label: 'Activity Points', value: '', icon: '⭐', color: '#10b981' }, { label: 'Answered Queries', value: '2', icon: '💬', color: '#f59e0b' }, { label: 'Upcoming Deadlines', value: '4', icon: '📅', color: '#ef4444' }];
   const quickActions = [ { to: '/student/assignments', label: 'View Assignments', icon: '📚' }, { to: '/student/queries', label: 'My Queries', icon: '💬' }, { to: '/student/activities', label: 'Activity Points', icon: '🏆' }, { to: '/calendar', label: 'View Calendar', icon: '📅' }];
 
   return (
@@ -17,7 +17,7 @@ const StudentDashboard = ({ onLogout }) => {
         <main className="dashboard-main">
           <div className="dashboard-content">
             <div className="welcome-section">
-              <div><h1 className="dashboard-title">Welcome, John! 👋</h1><p className="dashboard-subtitle">Here's what's new for you today.</p></div>
+              <div><h1 className="dashboard-title">Welcome! 👋</h1><p className="dashboard-subtitle">Here's what's new for you today.</p></div>
             </div>
             <div className="stats-grid">
               {stats.map((stat) => (
